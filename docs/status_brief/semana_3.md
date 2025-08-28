@@ -18,7 +18,8 @@ Definir decisiones, objetivos, seguimiento y establecer status de planeamiento, 
 - OnePager y Matriz de Riesgos inicial redactados y subidos al repo.  
 - Definido el Alcance del MVP v1 con objetivo SMART, historias clave y DoD.  
 - Backlog priorizado con las 10 historias principales y t-shirt sizing.
-- Establecido Roadmap inicial y diseñado arquitectura inical del proyecto.  
+- Establecido Roadmap inicial y diseñado arquitectura inical del proyecto.
+- Creación de base de datos para almacenar la data transformada.
 
 ---
 
