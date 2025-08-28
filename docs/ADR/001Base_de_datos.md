@@ -1,0 +1,7 @@
+- Status: accepeted
+- Fecha 2025-08-28
+- Contexto: creacion de base de datos, como, cual y porque usar.
+- Alternativas: aiven, aws para la nube. Para la base de datos PostgreDB o Mysql.
+- Decisión: aiven con Mysql, debido a la facilidad de conexión además de ser gratis. Contra, recursos de procesamiento limitados.
+- Consecuencias: base de datos donde guardar los datos de la ingesta y tomarlos para el feature engineering, capacidad hacer un pipeline de procesamiento.
+- Seguimiento: Ver actividad de la base de datos, su funcionamiento correcto y la capacidad de esta durante el proyecto.
