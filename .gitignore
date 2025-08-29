@@ -1,0 +1,9 @@
+# __________ ARCHIVOS SENSIBLES
+.env
+*.key
+*.pem
+*.crt
+*.p12
+*.jks
+secrets/
+config/*.secret
