@@ -21,10 +21,8 @@ connection = pymysql.connect(
   
 try:
   cursor = connection.cursor()
-  cursor.execute("DROP TABLE mytest")
-  cursor.execute("CREATE TABLE mytest (id INTEGER PRIMARY KEY)")
-  cursor.execute("INSERT INTO mytest (id) VALUES (1), (2)")
-  cursor.execute("SELECT * FROM mytest")
+  cursor.execute("USE defaultdb")
+  cursor.execute("SELECT * FROM BancoX")
   print(cursor.fetchall())
 finally:
   connection.close()
