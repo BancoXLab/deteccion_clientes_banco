@@ -5,24 +5,17 @@ from dotenv import load_dotenv
 # Cargar las variables del archivo .env
 load_dotenv()
 
-# Acceder a las variables
-db = os.getenv("db")
-host = os.getenv("host")
-port = int(os.getenv("port"))
-user = os.getenv("user")
-password = os.getenv("password")
-
 timeout = 10
 connection = pymysql.connect(
   charset="utf8mb4",
   connect_timeout=timeout,
   cursorclass=pymysql.cursors.DictCursor,
-  db=db,
-  host=host,
-  password=password,
+  db=os.getenv("db"),
+  host=os.getenv("host"),
+  password=os.getenv("password"),
   read_timeout=timeout,
-  port=port,
-  user=user,
+  port= int(os.getenv("port")),
+  user=os.getenv("user"),
   write_timeout=timeout,
 )
   
