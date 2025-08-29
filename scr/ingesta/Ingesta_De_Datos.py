@@ -1,5 +1,16 @@
-import pymysql; import os
+import pymysql
+import os
+from dotenv import load_dotenv
 
+# Cargar las variables del archivo .env
+load_dotenv()
+
+# Acceder a las variables
+db = os.getenv("db")
+host = os.getenv("host")
+port = int(os.getenv("port"))
+user = os.getenv("user")
+password = os.getenv("password")
 
 timeout = 10
 connection = pymysql.connect(
