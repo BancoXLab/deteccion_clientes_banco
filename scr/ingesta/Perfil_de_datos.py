@@ -2,7 +2,8 @@ import pandas as pd
 from ydata_profiling import ProfileReport
 
 df = pd.read_csv("/workspaces/deteteccion_clientes_banco/data/bank-additional-full.csv", sep=";")
-profile = ProfileReport(df, title="Perfil de Datos", explorative=True)
+
+profile = ProfileReport(df)
 
 try:
     profile.to_file("/workspaces/deteteccion_clientes_banco/docs/reporte_perfil.html")
