@@ -1,4 +1,4 @@
-- Status: accepeted
+- Status: accepted
 - Fecha 2025-08-28
 - Contexto: creacion de base de datos, como, cual y porque usar.
 - Alternativas: aiven, aws para la nube. Para la base de datos PostgreDB o Mysql.

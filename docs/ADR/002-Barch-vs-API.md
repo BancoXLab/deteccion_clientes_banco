@@ -1,0 +1,7 @@
+- Status: proposed
+- Fecha 2025-08-29
+- Contexto: La institución bancaria tiene registro de las llamadas de la campaña por día y mes.
+- Alternativas: Flujo Batch diario, Flujo Batch mensual, Flujo Streaming
+- Decisión: Se elige el flujo de Batch diario
+- Consecuencias: Implementación simple, impedimiento para predicción real-time.
+- Seguimiento: -

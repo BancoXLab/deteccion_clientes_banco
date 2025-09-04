@@ -1,0 +1,7 @@
+- Status: proposed
+- Fecha 2025-08-31
+- Contexto: Los resultados del modelo deben ser consumidos por el equipo de marketing y el call center.
+- Alternativas: Archivo CSV; PostgreSQL.
+- Decisión: -
+- Consecuencias: Fácil consumición. Posible latencia de sincronización
+- Seguimiento: -

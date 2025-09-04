@@ -1,0 +1,7 @@
+- Status: proposed
+- Fecha 2025-09-1
+- Contexto: El equipo del proyecto desea incluir una representación visual del modelo y sus resultados.
+- Alternativas: Streamlit; Gradio
+- Decisión: -
+- Consecuencias: Construcción rápida. Falta de productividad a gran escala.
+- Seguimiento: -

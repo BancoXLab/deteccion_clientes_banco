@@ -6,7 +6,7 @@ Construir un prototipo funcional y reproducible que permita clasificar clientes 
 ---
 
 ## Historias clave
-1. **Como ingerniero de datos**, quiero limpiar y preprocesar el dataset (nulos, duplicados, codificación), **para asegurar que los modelos puedan entrenar sin errores**.  
+1. **Como ingeniero de datos**, quiero limpiar y preprocesar el dataset (nulos, duplicados, codificación), **para asegurar que los modelos puedan entrenar sin errores**.  
 2. **Como científico de datos**, quiero entrenar un modelo baseline (Regresión Logística), **para obtener una métrica inicial de desempeño**.  
 3. **Como científico de datos**, quiero probar un modelo avanzado (Random Forest o Gradient Boosting), **para mejorar la sensibilidad (recall) y precisión**.  
 4. **Como ingeniero de datos**, quiero disponer de un pipeline reproducible (`make train` o script único), **para que cualquiera en el equipo pueda ejecutar el entrenamiento de forma consistente**.  

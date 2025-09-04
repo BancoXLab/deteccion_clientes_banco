@@ -1,0 +1,7 @@
+- Status: proposed
+- Fecha 2025-08-30
+- Contexto: El proyecto requiere asegurar una ejecución reproducible.
+- Alternativas: Makefile/cron job simple; Airflow/Luigi
+- Decisión: -
+- Consecuencias: Simplicidad inicial. Posible escalamiento limitado.
+- Seguimiento: -
