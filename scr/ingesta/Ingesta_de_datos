@@ -1,27 +1,37 @@
 import pymysql
 import os
 from dotenv import load_dotenv
+import sklearn as skl
+import pandas as pd
 
 load_dotenv()
 
-timeout = 10
-connection = pymysql.connect(
-  charset="utf8mb4",
-  connect_timeout=timeout,
-  cursorclass=pymysql.cursors.DictCursor,
-  db=os.getenv("db"),
-  host=os.getenv("host"),
-  password=os.getenv("password"),
-  read_timeout=timeout,
-  port=int(os.getenv("port")),
-  user=os.getenv("user"),
-  write_timeout=timeout,
-)
-  
-try:
-  cursor = connection.cursor()
-  cursor.execute("use defaultdb")
-  cursor.execute("SELECT * FROM BancoX")
-  print(cursor.fetchall())
-finally:
-  connection.close()
+"""
+hacer el pipeline de ingesta y luego mandar las filas del dataset a la base de datos para que despues se use en el Modelo de Machine Learning
+"""
+
+
+
+def escritura(dataset):
+  timeout = 10
+  connection = pymysql.connect(
+    charset="utf8mb4",
+    connect_timeout=timeout,
+    cursorclass=pymysql.cursors.DictCursor,
+    db=os.getenv("db"),
+    host=os.getenv("host"),
+    password=os.getenv("password"),
+    read_timeout=timeout,
+    port=int(os.getenv("port")),
+    user=os.getenv("user"),
+    write_timeout=timeout,
+  )
+
+  dataset.to_sql(
+      name="BancoX",
+      con=connection,    
+      if_exists="append",
+      index=False,       
+      chunksize=1000,    
+      method="multi"     # agrupa inserts -> menos round-trips
+  )
