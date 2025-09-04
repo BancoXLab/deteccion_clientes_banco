@@ -35,3 +35,4 @@ def escritura(dataset):
       chunksize=1000,    
       method="multi"     # agrupa inserts -> menos round-trips
   )
+  connection.close()
