@@ -1,15 +1,29 @@
 import pymysql
 import os
 from dotenv import load_dotenv
-import sklearn as skl
+from sklearn.datasets import fetch_openml
 import pandas as pd
 
 load_dotenv()
 
-"""
-hacer el pipeline de ingesta y luego mandar las filas del dataset a la base de datos para que despues se use en el Modelo de Machine Learning
-"""
+def ingesta():
+  """
+  ingesta de datos desde origen para emepzar a trabajar con ellos
+  1. leer los datos desde la fuente
+  2. procesar los datos (limpieza, transformacion, etc)
+  3. escribir los datos en la base de datos
+  """
 
+  source = fetch_openml(data_id=42813, as_frame=True)
+  data = pd.DataFrame(source.data)
+  
+  return data
+
+# def outliers(data):
+
+# def duplicados(data):
+
+# def nulos(data):
 
 
 def escritura(dataset):
