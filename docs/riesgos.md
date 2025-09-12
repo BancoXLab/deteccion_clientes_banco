@@ -10,3 +10,8 @@
 | R6  | Generación de datos sinteticos  | B     | M       | 🟡   | DS/DE  | Validar representatividad; SMOTE      | S5    |
 | R7  | Conexión pipeline y dependencias| M     | A       | 🔴   | DE/TL  | Tests de integración, CI/CD con validación de flujo    | S6    |
 | R8  | Método visualización al usuario | M     | M       | 🟠   | PO/DS  | Prototipo temprano con feedback de marketing         | S8    |
+| R9  | Fallo levantar MLflow en local  | M     | M       | 🟠   | DS/DE  | Probar instalación en venv/conda; usar Dockers      | S5    |
+| R10 | Problemas para subir experimento| B     | A       | 🟠   | DE/TL  | Configurar backend local primero; planilla Excel       | S5    |
+| R11 | Loss tracking de experimentos   | M     | M       | 🟠   | DS     | Definir convención de nombres de runs + seed fijo   | S5    |
+| R12 | Dependencia excesiva en MLflow  | B     | M       | 🟡   | PO/TL  | Mantener tracking paralelo en planilla/CSV      | S6    | 
+| R13 | Escalabilidad limitada de MLflow| B     | M       | 🟡   | DS     | Limitar runs iniciales; limpieza semanal de logs;     | S7    |
