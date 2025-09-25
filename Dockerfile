@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copiar requirements.txt e instalar dependencias
-COPY deteccion_clientes_banco/requirements_dock.txt .
-RUN pip install --no-cache-dir -r deteccion_clientes_banco/requirements_dock.txt
+COPY requirements_dock.txt .
+RUN pip install --no-cache-dir -r requirements_dock.txt
 
 # Copiar el proyecto (incluido tu notebook)
 COPY . .
