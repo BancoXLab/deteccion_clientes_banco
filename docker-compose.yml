@@ -8,4 +8,4 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
-    working_dir: /app/modelo/baseline_repro
+    working_dir: /app/modelo/baseline_repro/
