@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copiar requirements.txt e instalar dependencias
-COPY requierements_dock.txt .
-RUN pip install --no-cache-dir -r requierements_dock.txt
+COPY requirements_dock.txt .
+RUN pip install --no-cache-dir -r requirements_dock.txt
 
 # Copiar el proyecto (incluido tu notebook)
 COPY . .
