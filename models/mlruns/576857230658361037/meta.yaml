@@ -1,0 +1,6 @@
+artifact_location: file:///workspaces/deteccion_clientes_banco/models/mlruns/576857230658361037
+creation_time: 1758801519830
+experiment_id: '576857230658361037'
+last_update_time: 1758801519830
+lifecycle_stage: active
+name: XGBoost
