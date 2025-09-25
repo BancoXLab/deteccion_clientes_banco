@@ -1,0 +1,22 @@
+artifact_path: /workspaces/deteccion_clientes_banco/mlruns/4/models/m-011e0f496a0a40b5a5aabe06fc8f10e6/artifacts
+flavors:
+  python_function:
+    data: model.xgb
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.12.1
+  xgboost:
+    code: null
+    data: model.xgb
+    model_class: xgboost.sklearn.XGBClassifier
+    model_format: xgb
+    xgb_version: 3.0.5
+mlflow_version: 3.4.0
+model_id: m-011e0f496a0a40b5a5aabe06fc8f10e6
+model_size_bytes: 8266841
+model_uuid: m-011e0f496a0a40b5a5aabe06fc8f10e6
+prompts: null
+run_id: e94939d0af5a4c25a9283bc6e6ba6b48
+utc_time_created: '2025-09-25 22:18:05.441559'
