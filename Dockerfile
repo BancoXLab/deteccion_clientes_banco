@@ -15,13 +15,13 @@ WORKDIR /app
 
 # Copiar requirements.txt e instalar dependencias
 COPY requirements_dock.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements_dock.txt
 
 # Copiar el proyecto (incluido tu notebook)
 COPY . .
 
 # Exponer puerto para Jupyter
-EXPOSE 8888
+EXPOSE 5000
 
 # Comando por defecto: lanzar Jupyter
-CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--allow-root", "--NotebookApp.token=''", "--NotebookApp.password=''"]
+CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=5000", "--allow-root", "--NotebookApp.token=''", "--NotebookApp.password=''"]
