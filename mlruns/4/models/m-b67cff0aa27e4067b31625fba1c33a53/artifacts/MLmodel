@@ -1,0 +1,22 @@
+artifact_path: /workspaces/deteccion_clientes_banco/mlruns/4/models/m-b67cff0aa27e4067b31625fba1c33a53/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.1
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+mlflow_version: 3.4.0
+model_id: m-b67cff0aa27e4067b31625fba1c33a53
+model_size_bytes: 2060
+model_uuid: m-b67cff0aa27e4067b31625fba1c33a53
+prompts: null
+run_id: a94d98b618ef40f8a3e4babdc9eaac35
+utc_time_created: '2025-09-25 13:32:40.779244'
