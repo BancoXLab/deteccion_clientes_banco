@@ -8,6 +8,7 @@ from sklearn.preprocessing import FunctionTransformer
 from encoding import enc_preprocessor
 from esquema_DB import definir_esquema
 from prefect import flow, task, get_run_logger
+import prefect
 
 load_dotenv()
 
@@ -140,4 +141,4 @@ def etl_banco():
 
 
 if __name__ == "__main__":
-    etl_banco()
+    etl_banco.serve(name="Ingesta de datos", cron="* * * * *")
