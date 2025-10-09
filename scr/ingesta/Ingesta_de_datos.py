@@ -122,5 +122,22 @@ def escritura(dataset_clean):
     finally:
         connection.close()
 
+# --------------------------------------------------------
+# Prefect flow principal
+# --------------------------------------------------------
 
-escritura()
+@flow(name="ETL BancoX - Prefect Flow")
+def etl_banco():
+    logger = get_run_logger()
+    logger.info("Iniciando flujo ETL BancoX...")
+
+    data = ingesta()
+    data_no_dupes = remove_duplicates(data)
+    data_clean = transformar(data_no_dupes)
+    escritura(data_clean)
+
+    logger.info("Flujo ETL completado con éxito ✅")
+
+
+if __name__ == "__main__":
+    etl_banco()
