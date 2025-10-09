@@ -39,10 +39,11 @@ def remove_duplicates(df):
     return df
 
 
-@task(name="Transformar datos")
+@task(name="Transformar datos", timeout_seconds=900, retries=2, retry_delay_seconds=30)
 def transformar(dataset):
     """Aplica encoding y limpieza para la base SQL"""
     logger = get_run_logger()
+    logger.info("Iniciando transformación de datos...")
 
     y = dataset["y"]
     X = dataset.drop(columns="y")
@@ -53,75 +54,67 @@ def transformar(dataset):
     X_clean_df = pd.DataFrame(X_clean, columns=feature_names)
     X_clean_df["y"] = y.values
 
-    # limpiar nombres de columnas para SQL
-    cols = []
-    for col in X_clean_df.columns:
-        if 'num__' in col:
-            cols.append(col.replace('num__', ''))    
-        elif 'cat__' in col:
-            cols.append(col.replace('cat__', '').replace('x0_', ''))
-        elif 'ord__' in col:
-            cols.append(col.replace('ord__', ''))
-        else:
-            cols.append(col)
-    X_clean_df.columns = cols
+    # Diccionario de reemplazos específicos
+    replacements = {
+        ".": "_",
+        "-": "_",
+        "num__": "",
+        "cat__": "",
+        "ord__": "",
+        "x0_": "",
+    }
 
-    # renombrar columnas problemáticas
-    X_clean_df = X_clean_df.rename(columns={
-        "emp.var.rate": "emp_var_rate",
-        "cons.price.idx": "cons_price_idx",
-        "cons.conf.idx": "cons_conf_idx",
-        "nr.employed": "nr_employed",
-        "job_admin.": "job_admin",
-        "job_blue-collar": "job_blue_collar",
-        "job_self-employed": "job_self_employed"
-    })
+    # Función de limpieza de nombres
+    def clean_column(col):
+        for old, new in replacements.items():
+            col = col.replace(old, new)
+        return col
+
+    # Aplicar limpieza
+    X_clean_df.columns = [clean_column(col) for col in X_clean_df.columns]
 
     logger.info("Transformación completada correctamente.")
     return X_clean_df
 
 
-@task(name="Escritura en la base de datos")
-def escritura(dataset_clean):
-    """Escribe los datos procesados en MySQL"""
+@task(name="Escritura en la base de datos", timeout_seconds=6600, retries=2, retry_delay_seconds=30)
+def escritura(dataset_clean, block_size=3000):
+    """Carga por bloques para evitar timeouts en Prefect"""
     logger = get_run_logger()
+    logger.info("Conectando a la base de datos...")
 
-    timeout = 10
-    connection = pymysql.connect(
-        charset="utf8mb4",
-        connect_timeout=timeout,
-        cursorclass=pymysql.cursors.DictCursor,
-        db=os.getenv("db"),
-        host=os.getenv("host"),
-        password=os.getenv("password"),
-        read_timeout=timeout,
-        port=int(os.getenv("port")),
-        user=os.getenv("user"),
-        write_timeout=timeout,
-    )
-    
-    engine = create_engine(
-        f"mysql+pymysql://{os.getenv('user')}:{os.getenv('password')}"
-        f"@{os.getenv('host')}:{os.getenv('port')}/{os.getenv('db')}"
-    )
+    # Engine SQLAlchemy
+    engine_url = f"mysql+pymysql://{os.getenv('user')}:{os.getenv('password')}@{os.getenv('host')}:{os.getenv('port')}/{os.getenv('db')}?charset=utf8mb4"
+    engine = create_engine(engine_url, pool_pre_ping=True)
 
+    # Crear esquema si no existe
     metadata, BancoX = definir_esquema()
     metadata.create_all(engine)
 
+    # Carga por bloques
+    total_rows = len(dataset_clean)
+    logger.info(f"Iniciando carga de {total_rows:,} filas en bloques de {block_size:,}...")
+
     try:
-        dataset_clean.to_sql(
-            name="BancoX",
-            con=engine,
-            if_exists="append",
-            index=False,
-            chunksize=1000,
-            method="multi"
-        )
-        logger.info("✅ Datos insertados correctamente.")
+        logger.info("Estoy en el try")
+        for start in range(0, total_rows, block_size):
+            end = min(start + block_size, total_rows)
+            block = dataset_clean.iloc[start:end]
+            block.to_sql(
+                name="BancoX",
+                con=engine,
+                if_exists="append",
+                index=False,
+                method="multi"
+            )
+        logger.info("✅ Carga completada correctamente.")
+
     except Exception as e:
-        logger.error(f"Error al insertar los datos: {e}")
-    finally:
-        connection.close()
+        logger.error(f"❌ Error al insertar los datos: {e}")
+
+
+
+
 
 # --------------------------------------------------------
 # Prefect flow principal
@@ -132,10 +125,11 @@ def etl_banco():
     logger = get_run_logger()
     logger.info("Iniciando flujo ETL BancoX...")
 
-    data = ingesta()
-    data_no_dupes = remove_duplicates(data)
-    data_clean = transformar(data_no_dupes)
-    escritura(data_clean)
+    data = ingesta.submit()
+    data_no_dupes = remove_duplicates.submit(data)
+    data_clean = transformar.submit(data_no_dupes)
+    escritura.submit(data_clean)
+
 
     logger.info("Flujo ETL completado con éxito ✅")
 
