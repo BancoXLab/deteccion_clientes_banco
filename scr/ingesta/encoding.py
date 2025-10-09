@@ -1,4 +1,3 @@
-from prefect import task, flow
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 
