@@ -1,10 +1,10 @@
-__pycache__/
+__pycache__
 *.pyc
 *.pyo
 *.pyd
-*.pkl
-*.DS_Store
+*.db
+*.sqlite3
 .env
 .git
 .gitignore
-.vscode
+Dockerfile

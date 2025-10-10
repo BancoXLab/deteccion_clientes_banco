@@ -1,17 +1,10 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from app.model.model import predict_pipeline, __version__ as model_version
+from model.model import predict_pipeline, __version__ as model_version
 
 app = FastAPI()
 
-class TextIn(BaseModel):
-    text: str
-
-class PredictionOut(BaseModel):
-    text: str
-
-
-# Columnas de entrada
+# Columnas de entrada para el modelo
 class ClientData(BaseModel):
     age: float
     month: int
@@ -50,6 +43,6 @@ def home():
 def predict(input_data: ClientData):
     prediction = predict_pipeline(input_data.dict())
     return {
-        "prediction": int(prediction),
+        "prediction": prediction,
         "model_version": model_version,
     }

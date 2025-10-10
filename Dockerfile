@@ -1,16 +1,16 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
 
 # Copiar requerimientos
-COPY ./requirements.txt /app/app/requirements.txt
+COPY ./app/requirements.txt /app/requirements.txt
 
 # Instalar dependencias
-RUN pip install --no-cache-dir --upgrade -r /app/app/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
-
-COPY ./app/app /app/app
+# Copiar la aplicación
+COPY ./app /app
 
 # Establecer directorio de trabajo
-WORKDIR /app/app
+WORKDIR /app
 
 # Exponer puerto
 EXPOSE 80
