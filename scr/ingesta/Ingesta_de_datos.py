@@ -97,16 +97,18 @@ def escritura(dataset_clean, block_size=3000):
 
     try:
         logger.info("Estoy en el try")
-        for start in range(0, total_rows, block_size):
-            end = min(start + block_size, total_rows)
-            block = dataset_clean.iloc[start:end]
-            block.to_sql(
+        group_size = 5  # sube 5 bloques juntos
+        for i in range(0, total_rows, block_size * group_size):
+            end = min(i + block_size * group_size, total_rows)
+            mega_block = dataset_clean.iloc[i:end]
+            mega_block.to_sql(
                 name="BancoX",
                 con=engine,
                 if_exists="append",
                 index=False,
                 method="multi"
             )
+
         logger.info("✅ Carga completada correctamente.")
 
     except Exception as e:
