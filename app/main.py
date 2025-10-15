@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from model.model import predict_pipeline, __version__ as model_version
 
 app = FastAPI(
-    title="Cliente Suscripción Predictor API",
+    title="Banco X API",
     description="API que predice si un cliente se suscribirá o no usando un modelo entrenado",
     version=model_version
 )
@@ -41,7 +41,7 @@ class ClientData(BaseModel):
 @app.get("/")
 def home():
     return {
-        "message": "✅ API is up and running!",
+        "message": "✅ La API está levantada y corriendo!",
         "model_version": model_version,
     }
 
