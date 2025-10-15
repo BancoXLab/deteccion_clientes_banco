@@ -1,10 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from model.model import predict_pipeline, __version__ as model_version
 
-app = FastAPI()
+app = FastAPI(
+    title="Cliente Suscripción Predictor API",
+    description="API que predice si un cliente se suscribirá o no usando un modelo entrenado",
+    version=model_version
+)
 
-# Columnas de entrada para el modelo
+# Modelo de datos de entrada (sin 'y' — la target)
 class ClientData(BaseModel):
     age: float
     month: int
@@ -18,7 +22,6 @@ class ClientData(BaseModel):
     cons_conf_idx: float
     euribor3m: float
     nr_employed: float
-    y: int
     previous_bin: int
     job_target_mean: float
     marital_divorced: int
@@ -37,12 +40,25 @@ class ClientData(BaseModel):
 
 @app.get("/")
 def home():
-    return {"message": "API is up and running", "model_version": model_version}
+    return {
+        "message": "✅ API is up and running!",
+        "model_version": model_version,
+    }
 
 @app.post("/predict")
 def predict(input_data: ClientData):
-    prediction = predict_pipeline(input_data.dict())
-    return {
-        "prediction": prediction,
-        "model_version": model_version,
-    }
+    try:
+        prediction = predict_pipeline(input_data.dict())
+        return {
+            "prediction": prediction,
+            "model_version": model_version,
+        }
+    except ValueError as e:
+        # datos de entrada incompletos / mal formados
+        raise HTTPException(status_code=422, detail=str(e))
+    except RuntimeError as e:
+        # errores durante la predicción o mismatch con el modelo
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        # catch-all
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {e}")

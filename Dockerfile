@@ -14,3 +14,6 @@ WORKDIR /app
 
 # Exponer puerto
 EXPOSE 80
+
+# Comando por defecto (opcional, el contenedor base ya lo tiene)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]

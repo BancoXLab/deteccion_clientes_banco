@@ -1,6 +1,6 @@
-fastapi
-uvicorn
-pydantic
-xgboost
-numpy
-scikit-learn
+fastapi==0.115.2
+uvicorn==0.32.0
+pydantic==1.10.15
+xgboost==2.1.1
+numpy==1.26.4
+scikit-learn==1.5.2
