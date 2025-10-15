@@ -1,22 +1,22 @@
-from prefect import flow, task, get_run_logger
-import pandas as pd
-import numpy as np 
 import os
 import pymysql
+import pandas as pd
+import numpy as np
 from dotenv import load_dotenv
-from sklearn.pipeline import Pipeline
 from sqlalchemy import create_engine
 from imblearn.over_sampling import SMOTE
 
-
+# Cargar variables de entorno
 load_dotenv()
 
-@task(name = "Carga de datos")
+# --------------------------------------------------------
+# Carga de datos desde MySQL
+# --------------------------------------------------------
 def load_data():
     """
     Carga los datos desde la base de datos MySQL.
     """
-    logger = get_run_logger()
+    print("📥 Cargando datos desde MySQL...")
     
     timeout = 100
     connection = pymysql.connect(
@@ -38,52 +38,50 @@ def load_data():
     )
 
     try:
-        df = pd.read_sql_table(
-            table_name="BancoX",
-            con=engine
-        )
-        logger.info(f"Datos cargados: {df.shape[0]} filas y {df.shape[1]} columnas.")
+        df = pd.read_sql_table(table_name="BancoX", con=engine)
+        print(f"✅ Datos cargados: {df.shape[0]} filas y {df.shape[1]} columnas.")
     except Exception as e:
-        logger.error(f"Error al cargar los datos: {e}")
+        print(f"❌ Error al cargar los datos: {e}")
+        df = pd.DataFrame()  # Devuelve vacío si falla
     finally:
         connection.close()
 
     return df
 
-
-@task(name="Transformaciones de datos")
-def transformations(df):
+# --------------------------------------------------------
+# Transformaciones de datos (SMOTE)
+# --------------------------------------------------------
+def apply_smote(df):
     """
-    Realiza un oversampling a los datos para que estos queden listos para ser usados por el modelo, en caso de que esto no se aplique, simplemente no se corre el flow.
+    Realiza oversampling con SMOTE para balancear la clase objetivo.
     """
-    logger = get_run_logger()
+    print("🔄 Iniciando oversampling con SMOTE...")
 
-    # oversampling del dataset
-    df_to_smote = df.drop(columns=['y'])
-    y = df['y']
+    try:
+        X = df.drop(columns=["y"])
+        y = df["y"]
 
-    smote = SMOTE(sampling_strategy={1:10000}, random_state=42, k_neighbors=5)
-    logger.info("Iniciando oversampling con SMOTE...")
+        smote = SMOTE(sampling_strategy={1: 10000}, random_state=42, k_neighbors=5)
+        X_resampled, y_resampled = smote.fit_resample(X, y)
 
-    X_resampled, y_resampled = smote.fit_resample(df_to_smote, y)
+        df_resampled = pd.DataFrame(X_resampled, columns=X.columns)
+        df_resampled["y"] = y_resampled
 
-    df_resampled = pd.DataFrame(X_resampled, columns=df_to_smote.columns)
-    df_resampled["y"] = y_resampled
+        print(f"✅ Oversampling completo: {df_resampled.shape[0]} filas y {df_resampled.shape[1]} columnas.")
+        return df_resampled
 
-    logger.info(f"Datos después de SMOTE: {df_resampled.shape[0]} filas y {df_resampled.shape[1]} columnas.")
-    return df_resampled
+    except Exception as e:
+        print(f"❌ Error durante el oversampling: {e}")
+        return df
 
-@flow(name="Pipeline de entrenamientoy guardado")
-def train_pipeline():
-    logger = get_run_logger()
-    logger.info("Iniciando flujo de entrenamiento...")
-
-    # Cargar datos
-    data = load_data()
-
-    # Transformar
-    transformed_data = transformations(data)
-    logger.info(f"Datos transformados: {transformed_data.shape[0]} filas y {transformed_data.shape[1]} columnas.")
+# --------------------------------------------------------
+# Escritura de los datos transformados
+# --------------------------------------------------------
+def save_transformed_data(df):
+    """
+    Escribe los datos preparados en una nueva tabla MySQL.
+    """
+    print("💾 Guardando datos transformados en la base de datos...")
 
     timeout = 10
     connection = pymysql.connect(
@@ -98,14 +96,14 @@ def train_pipeline():
         user=os.getenv("user"),
         write_timeout=timeout,
     )
-    
+
     engine = create_engine(
         f"mysql+pymysql://{os.getenv('user')}:{os.getenv('password')}"
         f"@{os.getenv('host')}:{os.getenv('port')}/{os.getenv('db')}"
     )
 
     try:
-        transformed_data.to_sql(
+        df.to_sql(
             name="BancoX_prepared_data",
             con=engine,
             if_exists="append",
@@ -113,13 +111,31 @@ def train_pipeline():
             chunksize=1000,
             method="multi"
         )
-        logger.info("✅ Datos insertados correctamente.")
+        print("✅ Datos insertados correctamente en BancoX_prepared_data.")
     except Exception as e:
-        logger.error(f"Error al insertar los datos: {e}")
+        print(f"❌ Error al insertar los datos: {e}")
     finally:
         connection.close()
 
+# --------------------------------------------------------
+# Pipeline principal
+# --------------------------------------------------------
+def train_pipeline():
+    print("🚀 Iniciando pipeline de entrenamiento...")
+
+    df = load_data()
+    if df.empty:
+        print("⚠️ No se cargaron datos. Pipeline cancelado.")
+        return
+
+    df_transformed = apply_smote(df)
+    save_transformed_data(df_transformed)
+
+    print("🏁 Pipeline completado con éxito.")
 
 
+# --------------------------------------------------------
+# Ejecución directa
+# --------------------------------------------------------
 if __name__ == "__main__":
-    train_pipeline.serve(name="Pipeline de entrenamiento", cron="* * * * *")
+    train_pipeline()
