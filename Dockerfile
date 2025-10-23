@@ -1,19 +1,16 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+FROM python:3.12-slim
 
-# Copiar requerimientos
-COPY ./app/requirements.txt /app/requirements.txt
-
-# Instalar dependencias
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
-
-# Copiar la aplicación
-COPY ./app /app
-
-# Establecer directorio de trabajo
 WORKDIR /app
 
-# Exponer puerto
+# Copiar código (ajusta si tus requirements están en otra ruta)
+COPY ./scr/app /app
+# Si tienes requirements en scr/app/requirements.txt
+COPY ./scr/app/requirements.txt /app/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade pip \
+ && if [ -f /app/requirements.txt ]; then pip install --no-cache-dir -r /app/requirements.txt; fi
+
 EXPOSE 80
 
-# Comando por defecto (opcional, el contenedor base ya lo tiene)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+# Ejecuta el módulo según la ubicación real: scr.app.main:app (porque copiamos scr/app a /app)
+CMD ["uvicorn", "scr.app.main:app", "--host", "0.0.0.0", "--port", "80"]
