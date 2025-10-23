@@ -1,12 +1,15 @@
 import os
 import pymysql
+import logging
+from pathlib import Path
 import pandas as pd
+from sklearn.utils import resample
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from imblearn.over_sampling import SMOTE
 from prefect import flow, task, get_run_logger
 from pathlib import Path
-from esquema_DB_train import definir_esquema_prepared
+from scr.training.esquema_DB_train import definir_esquema_prepared
 
 # Cargar variables de entorno
 load_dotenv()
@@ -45,6 +48,41 @@ def load_data():
         logger.error(f"❌ Error al cargar los datos: {e}")
         raise
 
+def _safe_logger():
+    # Devuelve un logger de Prefect si hay contexto, o un logger estándar
+    try:
+        return get_run_logger()
+    except Exception:
+        return logging.getLogger(__name__)
+
+def apply_smote_raw(input_path: str, target_col: str = "y", target_per_class: int = 10000) -> str:
+    """
+    Oversampling aleatorio hasta `target_per_class` por clase (mínimo).
+    Devuelve la ruta del parquet resultante.
+    """
+
+    df = pd.read_parquet(input_path)
+    if target_col not in df.columns:
+        raise ValueError(f"{target_col} no está en las columnas del dataframe")
+
+    counts = df[target_col].value_counts()
+    max_n = counts.max()
+    # forzar mínimo por clase
+    target_n = max(max_n, int(target_per_class))
+
+    parts = []
+    for _, grp in df.groupby(target_col):
+        if len(grp) >= target_n:
+            parts.append(grp.sample(target_n, replace=False, random_state=0))
+        else:
+            parts.append(grp.sample(target_n, replace=True, random_state=0))
+
+    df_res = pd.concat(parts).reset_index(drop=True)
+
+    out_path = TMP_DIR / "smote_output.parquet"
+    TMP_DIR.mkdir(parents=True, exist_ok=True)
+    df_res.to_parquet(out_path, index=False)
+    return str(out_path)
 
 @task(name="Aplicar SMOTE", retries=1, retry_delay_seconds=20, timeout_seconds=900)
 def apply_smote(path_raw: str):
@@ -105,6 +143,17 @@ def save_transformed_data(path_resampled: str):
 
     except Exception as e:
         logger.error(f"❌ Error al insertar los datos: {e}")
+
+def clean_temp_files_raw(tmp_dir: str = None) -> None:
+    """
+    Lógica pura para limpiar archivos temporales.
+    """
+    dirp = Path(tmp_dir) if tmp_dir else TMP_DIR
+    for p in dirp.glob("*.parquet"):
+        try:
+            p.unlink()
+        except FileNotFoundError:
+            pass
 
 
 @task(name="Limpieza temporal")

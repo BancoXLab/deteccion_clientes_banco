@@ -4,10 +4,11 @@ import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sklearn.datasets import fetch_openml
-from encoding import enc_preprocessor
-from esquema_DB import definir_esquema
+from scr.ingesta.encoding import enc_preprocessor
+from scr.ingesta.esquema_DB import definir_esquema
 from prefect import flow, task, get_run_logger
 from pathlib import Path
+
 
 load_dotenv()
 
@@ -35,6 +36,17 @@ def ingesta():
     logger.info(f"✅ Dataset guardado en {path}, {data.shape[0]} filas.")
     return str(path)
 
+def remove_duplicates_raw(path_raw: str):
+    """Versión sin Prefect de remove_duplicates para testing"""
+    df = pd.read_parquet(path_raw)
+    n_before = len(df)
+    df = df.drop_duplicates()
+    n_after = len(df)
+    
+    path = Path(path_raw).parent / "dataset_nodupes.parquet"
+    df.to_parquet(path, index=False)
+    
+    return str(path)
 
 @task(name="Eliminar duplicados")
 def remove_duplicates(path_raw: str):
