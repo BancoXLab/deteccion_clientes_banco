@@ -14,7 +14,8 @@ df = pd.DataFrame({"x1":[1,1,2,3],"x2":[10,10,20,30],"y":[0,0,1,1]})
 infile = tmp/"input.parquet"
 df.to_parquet(infile)
 
-nodup = remove_duplicates_raw(str(infile), out_dir=str(tmp))
+# ✅ sin out_dir, ya guarda en la misma carpeta
+nodup = remove_duplicates_raw(str(infile))
 out = apply_smote_raw(nodup, target_col="y", target_per_class=10)
 print("Batch finished. output:", out)
 PY
