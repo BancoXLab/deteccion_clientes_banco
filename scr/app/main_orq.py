@@ -35,7 +35,9 @@ def get_system_metrics() -> Dict:
                 "percent": memory.percent,
                 "process_usage": process.memory_info().rss,
             },
-            "disk": {"usage": psutil.disk_usage('/')._asdict()},
+            "disk": {
+                "usage": psutil.disk_usage('/')._asdict()
+            },
             "process": {
                 "threads": process.num_threads(),
                 "open_files": len(process.open_files()),
