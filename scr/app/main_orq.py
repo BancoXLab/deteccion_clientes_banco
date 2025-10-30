@@ -1,6 +1,8 @@
 import pandas as pd
 import threading
 import platform
+import psutil
+import os
 from typing import Dict, Optional
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
@@ -17,6 +19,37 @@ app = FastAPI(
 )
 
 # ---- tasks de monitoreo ----
+@task(name="Get System Metrics")
+def get_system_metrics() -> Dict:
+    """Obtener métricas del sistema."""
+    try:
+        process = psutil.Process(os.getpid())
+        memory = psutil.virtual_memory()
+        
+        return {
+            "cpu": {
+                "percent": psutil.cpu_percent(interval=1),
+                "count": psutil.cpu_count(),
+                "freq": psutil.cpu_freq()._asdict() if psutil.cpu_freq() else {},
+            },
+            "memory": {
+                "total": memory.total,
+                "available": memory.available,
+                "percent": memory.percent,
+                "process_usage": process.memory_info().rss,
+            },
+            "disk": {
+                "usage": psutil.disk_usage('/')._asdict()
+            },
+            "process": {
+                "threads": process.num_threads(),
+                "open_files": len(process.open_files()),
+                "connections": len(process.connections()),
+            }
+        }
+    except Exception as e:
+        return {"status": "error", "reason": str(e)}
+
 @task(name="Check Model Status")
 def check_model_status() -> Dict:
     """Verificar estado del modelo de predicción."""
@@ -39,10 +72,16 @@ def log_health_status(component: str, status: Dict):
 def health_check_flow() -> Dict:
     """Flow para verificar estado general del servicio."""
     model_status = check_model_status()
+    system_metrics = get_system_metrics()
+    
     log_health_status("model", model_status)
+    log_health_status("system", system_metrics)
+    
     return {
         "status": "ok" if model_status["status"] == "ok" else "degraded",
-        "model": model_status
+        "model": model_status,
+        "system": system_metrics,
+        "timestamp": datetime.now().isoformat()
     }
 
 # ---- endpoints ----
