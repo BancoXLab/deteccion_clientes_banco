@@ -6,7 +6,7 @@ from typing import Dict
 from fastapi import FastAPI, HTTPException
 from prefect import flow, task, get_run_logger
 from model.model import predict_pipeline, __version__ as model_version
-from routes.general_routes import router as general_router  # 👈 importar las rutas externas
+from routes.general_routes import router as general_router
 
 app = FastAPI(
     title="Banco X API (Prefect Integration)",

@@ -1,16 +1,21 @@
+# Imagen base ligera
 FROM python:3.12-slim
 
+# Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar código (ajusta si tus requirements están en otra ruta)
-COPY ./scr/app /app
-# Si tienes requirements en scr/app/requirements.txt
+# Copiar requirements primero (para aprovechar cache de Docker)
 COPY ./scr/app/requirements.txt /app/requirements.txt
 
+# Instalar dependencias
 RUN pip install --no-cache-dir --upgrade pip \
- && if [ -f /app/requirements.txt ]; then pip install --no-cache-dir -r /app/requirements.txt; fi
+ && pip install --no-cache-dir -r /app/requirements.txt
 
-EXPOSE 80
+# Copiar todo el código de la app
+COPY ./scr/app /app
 
-# Ejecuta el módulo según la ubicación real: scr.app.main:app (porque copiamos scr/app a /app)
-CMD ["uvicorn", "scr.app.main:app", "--host", "0.0.0.0", "--port", "80"]
+# Exponer el puerto donde correrá FastAPI (8000 recomendado)
+EXPOSE 8000
+
+# Comando de inicio
+CMD ["uvicorn", "main_orq:app", "--host", "0.0.0.0", "--port", "8000"]
