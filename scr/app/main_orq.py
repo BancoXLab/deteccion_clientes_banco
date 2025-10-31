@@ -1,8 +1,9 @@
 import platform
 import psutil
 import os
+from pydantic import BaseModel, field_validator
 from datetime import datetime
-from typing import Dict
+from typing import Dict, Any
 from fastapi import FastAPI, HTTPException
 from prefect import flow, task, get_run_logger
 from model.model import predict_pipeline, __version__ as model_version
@@ -116,3 +117,26 @@ def info() -> Dict:
             "python": platform.python_version(),
             "prefect_enabled": True
         }
+    
+# ---- Validador general para todos los campos ----
+@field_validator("*", mode="before")
+def validar_tipos(cls, value: Any, info):
+    """Valida tipos antes de parsear, con mensaje personalizado."""
+    field_name = info.field_name
+
+    if value is None:
+        raise ValueError(f"El campo '{field_name}' no puede ser nulo.")
+
+    # Validar tipo esperado por nombre de campo
+    if field_name in ["month", "day_of_week", "previous_bin",
+                          "marital_divorced", "marital_married", "marital_single", "marital_unknown",
+                          "housing_no", "housing_unknown", "housing_yes",
+                          "loan_no", "loan_unknown", "loan_yes",
+                          "contact_cellular", "contact_telephone"]:
+        if not isinstance(value, int):
+            raise TypeError(f"El campo '{field_name}' debe ser un número entero (int).")
+    else:
+        if not isinstance(value, (float, int)):
+            raise TypeError(f"El campo '{field_name}' debe ser un número decimal (float).")
+
+    return value
