@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pydantic
+xgboost
+numpy
+scikit-learn
+pip install fastapi uvicorn

@@ -1,0 +1,55 @@
+from sqlalchemy import MetaData, Table, Column, Integer, Float
+
+def definir_esquema_prepared():
+    metadata = MetaData()
+
+    BancoX_prepared = Table(
+        "BancoX_prepared_data", metadata,
+        Column("id", Integer, primary_key=True, autoincrement=True),
+        Column("age", Integer),
+        Column("duration", Integer),
+        Column("campaign", Integer),
+        Column("pdays", Integer),
+        Column("previous", Integer),
+        Column("emp_var_rate", Float),
+        Column("cons_price_idx", Float),
+        Column("cons_conf_idx", Float),
+        Column("euribor3m", Float),
+        Column("nr_employed", Float),
+        Column("education", Float),
+        Column("month", Float),
+        Column("day_of_week", Float),
+        Column("job_admin", Float),
+        Column("job_blue_collar", Float),
+        Column("job_entrepreneur", Float),
+        Column("job_housemaid", Float),
+        Column("job_management", Float),
+        Column("job_retired", Float),
+        Column("job_self_employed", Float),
+        Column("job_services", Float),
+        Column("job_student", Float),
+        Column("job_technician", Float),
+        Column("job_unemployed", Float),
+        Column("job_unknown", Float),
+        Column("marital_divorced", Float),
+        Column("marital_married", Float),
+        Column("marital_single", Float),
+        Column("marital_unknown", Float),
+        Column("default_no", Float),
+        Column("default_unknown", Float),
+        Column("default_yes", Float),
+        Column("housing_no", Float),
+        Column("housing_unknown", Float),
+        Column("housing_yes", Float),
+        Column("loan_no", Float),
+        Column("loan_unknown", Float),
+        Column("loan_yes", Float),
+        Column("contact_cellular", Float),
+        Column("contact_telephone", Float),
+        Column("poutcome_failure", Float),
+        Column("poutcome_nonexistent", Float),
+        Column("poutcome_success", Float),
+        Column("y", Integer)
+    )
+
+    return metadata, BancoX_prepared

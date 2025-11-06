@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    container_name: bancox_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - ENV=dev
+    command: ["uvicorn", "scr.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  client:
+    image: python:3.11-slim
+    container_name: bancox_client
+    command: ["python", "/app/scr/client/client.py"]
+    volumes:
+      - .:/app
+    depends_on:
+      - api
+
+  monitor:
+    build: .
+    container_name: bancox_monitor
+    command: ["python", "/app/scr/ops/monitor.py"]
+    volumes:
+      - .:/app
+    depends_on:
+      - api
+    environment:
+      - CONFIG_PATH=/app/config/monitoring.json
+
+  alert-server:
+    build: .
+    container_name: bancox_alerts
+    ports:
+      - "9000:9000"
+    command: ["python", "/app/scr/ops/alert_server.py"]
+    volumes:
+      - .:/app
+    depends_on:
+      - monitor
+
+  dashboard:
+    build: .
+    container_name: bancox_dashboard
+    ports:
+      - "8501:8501"
+    command: ["streamlit", "run", "/app/artifacts/monitor_dashboard.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    volumes:
+      - .:/app
+    depends_on:
+      - alert-server

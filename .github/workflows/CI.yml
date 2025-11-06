@@ -1,0 +1,53 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install -U pip
+          pip install -r requirements.lock
+
+      - name: Run tests
+        run: pytest -q
+
+  build-image:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t bancox:ci .
+
+      - name: Run Docker container (health check)
+        run: |
+          docker run -d -p 8000:80 --name bancox_test bancox:ci
+          echo "Esperando 5 segundos..."
+          sleep 5
+          echo "Verificando endpoint /health"
+          curl -f http://127.0.0.1:8000/health
+          echo "Health check OK ✅"
+        shell: bash
+
+      - name: Stop Docker container
+        if: always()
+        run: docker stop bancox_test
