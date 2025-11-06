@@ -1,64 +1,133 @@
-# RUNBOOK — deteccion_clientes_banco
+# RUNBOOK — <Nombre del servicio / MVP>
 
-## 1. Propósito
-Runbook mínimo para operación: despliegue, monitorización, SLOs, alertas y procedimiento de incidentes.
+## 1) Contactos y alcance
+- **Dueño técnico:** <Nombre> (@usuario)
+- **Soporte/Incidentes:** <Canal> (ej. #staging-ml)
+- **Horario operativo:** <días/horas>
+- **Alcance:** API `/predict` en **staging** (este runbook no cubre producción)
 
-## 2. Despliegue (paso a paso)
-1. Clonar repo: `git clone ... && cd /workspaces/deteccion_clientes_banco`
-2. Crear entorno: `python -m venv .venv && source .venv/bin/activate`
-3. Instalar deps: `python -m pip install --upgrade pip && pip install -r requirements.txt || pip install flask pandas numpy`
-4. Levantar la API (si existe): `uvicorn scr.app.main:app --host 0.0.0.0 --port 8000`
-5. Herramientas operativas: scripts en `scr/ops/`
+---
 
-## 3. Métricas y SLOs (T9)
-Definimos 3 métricas (técnica / negocio / drift) con SLOs y umbrales.
+## 2) Endpoints y checks rápidos
+- **Health:** `GET /healthz` → **200** `{ok, env, version}`
+- **Inferencia:** `POST /predict` → **200** `{customer_id, score, version}`
+- **Métricas:** `GET /metrics` → counters básicos (si aplica)
 
-- M1 — Disponibilidad / Error rate (técnica)
-  - Descripción: % de requests con status >=500 en ventana 5m.
-  - SLO: error_rate_5m < 1%
-  - Alerta WARN: error_rate_5m >= 0.5%
-  - Alerta CRÍTICA: error_rate_5m >= 1%
+**Comandos (ejemplo):**
+```bash
+curl -s http://<HOST>:8000/healthz
+curl -s -X POST http://<HOST>:8000/predict -H "Content-Type: application/json"   -d '{"customer_id":"123","features":{"monto":100}}'
+```
 
-- M2 — Latencia (técnica / negocio)
-  - Descripción: p95 de latencia de predicción.
-  - SLO: p95 < 500 ms
-  - Alerta: p95 >= 500 ms
+---
 
-- M3 — Model drift (negocio)
-  - Descripción: cambio en media de la característica `saldo` respecto baseline.
-  - SLO: cambio relativo < 10%
-  - Alerta: cambio relativo >= 10%
+## 3) Configuración (env vars y flags)
+- `APP_ENV=staging`
+- `APP_USE_MOCK=true|false`  ← **toggle** del modelo
+- `MODEL_PATH=/artifacts/model.joblib`
+- Otros: <...>
 
-## 4. Dónde recoger métricas
-- Logs de aplicación: `/tmp/app.log` (formato: timestamp LEVEL name message ...)
-- Datos de entrada muestreados: `data/sample.csv`
-- Scripts de monitor: `scr/ops/monitor.py` (comprobaciones y reglas)
+**Versión actual:** commit `<sha>` · modelo `<run_id/versión>`
 
-## 5. Alertas (canales y responsables)
-- Canal primario: email del equipo (ops@example.com) / Slack #ops (configurable)
-- Fallback: webhook / archivo `scr/ops/alerts.log`
-- Responsable inicial: On-call dev del equipo (persona en rota)
+---
 
-## 6. Procedimiento de incidentes (triage → rollback)
-1. Triage:
-   - Identificar alerta (logs, monitor scripts, UI)
-   - Clasificar: degradación, outage, seguridad
-2. Contención:
-   - Si es regresión de despliegue: revertir a la última imagen estable (docker-compose down && docker-compose up --no-deps --build api)
-3. Diagnóstico:
-   - Revisar `/tmp/app.log`, `scr/ops/alerts.log` y métricas p95/error_rate
-4. Resolución:
-   - Aplicar fix, tests rápidos, desplegar
-5. Postmortem y actualizar RUNBOOK
+## 4) Start / Stop / Logs
+**Local (uvicorn):**
+```bash
+uvicorn src.api:app --host 0.0.0.0 --port 8000
+```
 
-## 7. Cómo simular 1 alerta (evidencia)
-1. Ejecutar el script de simulación:
-   - `python scr/ops/simulate_alert.py`
-   - Esto generará logs de error y un dataset con drift, y ejecutará el monitor para escribir `scr/ops/alerts.log`
-2. Levantar servidor de alertas para screenshot:
-   - `python scr/ops/alert_server.py`
-   - Abrir en host: `$BROWSER http://localhost:9000` y tomar screenshot del alerta generada (`alerts.log`)
+**Docker:**
+```bash
+docker run -d --name <svc> -p 8000:8000   -e APP_ENV=staging -e APP_USE_MOCK=true   <image>:<tag>
+```
 
-## 8. Ubicación de evidencias
-- docs/alerts_screenshots/alert1.png
-- scr/ops/alerts.log
+**Logs:**
+```bash
+docker logs -f <svc>    # o tail -f app.log
+```
+
+---
+
+## 5) Playbooks de incidentes (paso a paso)
+
+### 5.1 Healthz DOWN (3 fallos seguidos)
+1. Verificar proceso/contendor → **reiniciar**.
+2. Revisar últimos **5 min** de logs (buscar stacktrace).
+3. Si persiste: activar **APP_USE_MOCK=true** y reiniciar.
+4. Validar `/healthz` y **flujo feliz** en `/predict`.
+5. Registrar incidente (resumen y causa preliminar) y abrir **ticket**.
+
+**Criterio de éxito:** `/healthz` = 200 y 2 requests a `/predict` **OK**.
+
+---
+
+### 5.2 Latencia p95 > <umbral> por 5 min
+1. Capturar **5 requests** lentos (sin PII): tamaño payload, timestamps.
+2. Verificar dependencia de modelo/feature store/red.
+3. Mitigar: limitar payload / subir timeout cliente / **APP_USE_MOCK=true** temporal.
+4. Abrir ticket de performance con evidencia.
+
+**Criterio de éxito:** p95 vuelve por debajo de <umbral> por 10 min.
+
+---
+
+### 5.3 Errores 5xx > 1% por 10 min
+1. Distinguir **5xx** vs **input inválido** (convertible a 4xx).
+2. Endurecer validación (pydantic/jsonschema) para evitar 5xx por input.
+3. Si dependencia externa falla: retry/backoff o fallback documentado.
+
+**Criterio de éxito:** error rate < 1% por 10 min.
+
+---
+
+## 6) Rollback / Fallback
+- **Toggle de modelo (rápido):** `APP_USE_MOCK=true` + redeploy.
+- **Imagen previa:** `docker run <image>:<tag_anterior>` (tag S11 recomendado).
+- **Verificación post-rollback:** correr **smoke tests** y flujo feliz.
+
+---
+
+## 7) Verificación post-incidente
+- `pytest -m smoke` → **verde**
+- `/healthz` 200 y `/predict` contrato ok
+- Registrar: tiempo de recuperación, causa raíz breve, acciones A1–A3.
+
+---
+
+## 8) SLOs declarados (staging)
+- **Disponibilidad:** ≥ **98%** semanal (healthz=200)
+- **Latencia p95 /predict:** ≤ **300 ms**
+- **Errores 5xx:** ≤ **1%**
+
+**Error budget:** 2% semanal. Si se agota → priorizar fixes sobre features.
+
+---
+
+## 9) Alerta (simulada) — ejemplo
+- **Regla:** si `/healthz` falla **3** veces seguidas → **alertar** a `#staging-ml`.
+- **Acción:** reiniciar servicio; si persiste, `APP_USE_MOCK=true`; validar y registrar.
+
+**Script de ejemplo:**
+```bash
+# check_healthz.sh
+fails=0
+for i in {1..3}; do
+  code=$(curl -s -o /dev/null -w "%{http_code}" http://<HOST>:8000/healthz || echo 000)
+  [ "$code" != "200" ] && fails=$((fails+1))
+  sleep 2
+done
+if [ $fails -ge 3 ]; then
+  echo "[ALERTA] healthz falló 3 veces seguidas" >&2
+  exit 1
+else
+  echo "OK: healthz estable"
+fi
+```
+
+---
+
+## 10) Anexos
+- **Endpoints externos / secretos**: (no volcar secretos en texto claro)
+- **Diagrama corto**: <link/imagen opcional>
+- **Checklist de release**: <link>

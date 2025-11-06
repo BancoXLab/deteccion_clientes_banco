@@ -6,8 +6,8 @@ from datetime import datetime
 from typing import Dict, Any
 from fastapi import FastAPI, HTTPException
 from prefect import flow, task, get_run_logger
-from model.model import predict_pipeline, __version__ as model_version
-from routes.general_routes import router as general_router
+from scr.app.model.model import predict_pipeline, __version__ as model_version
+from scr.app.routes.general_routes import router as general_router
 
 app = FastAPI(
     title="Banco X API (Prefect Integration)",
@@ -35,11 +35,13 @@ def get_system_metrics() -> Dict:
                 "percent": memory.percent,
                 "process_usage": process.memory_info().rss,
             },
-            "disk": {"usage": psutil.disk_usage('/')._asdict()},
+            "disk": {
+                "usage": psutil.disk_usage('/')._asdict()
+            },
             "process": {
                 "threads": process.num_threads(),
                 "open_files": len(process.open_files()),
-                "connections": len(process.connections()),
+                "connections": len(process.net_connections()),
             }
         }
     except Exception as e:
