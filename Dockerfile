@@ -2,11 +2,14 @@
 FROM python:3.12-slim
 
 # Establecer directorio de trabajo
-COPY . /app
+ENV PYTHONPATH=/app
 WORKDIR /app
+COPY ./scr /app/scr
+COPY ./scr/app /app/scr/app
 
 # Copiar requirements primero (para aprovechar cache de Docker)
-COPY ./scr/app/requirements.txt /app/requirements.txt
+COPY ./config /app/config
+COPY ./requirements.txt /app/requirements.txt
 
 # Instalar dependencias
 RUN pip install --no-cache-dir --upgrade pip \
@@ -19,4 +22,4 @@ COPY ./scr/app /app
 EXPOSE 8000
 
 # Comando de inicio
-CMD ["uvicorn", "main_orq:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "scr.app.main_orq:app", "--host", "0.0.0.0", "--port", "80"]
