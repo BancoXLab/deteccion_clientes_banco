@@ -9,12 +9,11 @@ COPY ./scr/app /app/scr/app
 
 # Copiar requirements primero (para aprovechar cache de Docker)
 COPY ./config /app/config
-COPY ./requirements.txt /app/requirements.txt
+COPY ./requirements.lock /app/requirements.lock
 
 # Instalar dependencias
 RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir -r /app/requirements.txt
-
+    && pip install --no-cache-dir -r /app/requirements.lock
 # Copiar todo el código de la app
 COPY ./scr/app /app
 
