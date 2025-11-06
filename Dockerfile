@@ -2,6 +2,7 @@
 FROM python:3.12-slim
 
 # Establecer directorio de trabajo
+COPY . /app
 WORKDIR /app
 
 # Copiar requirements primero (para aprovechar cache de Docker)
