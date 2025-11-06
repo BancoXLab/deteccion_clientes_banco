@@ -1,9 +1,8 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Dict
 import platform
-
-from model.model import predict_pipeline, __version__ as model_version
+from scr.app.model.model import predict_pipeline, __version__ as model_version
 
 app = FastAPI(
     title="Banco X API",
@@ -12,11 +11,13 @@ app = FastAPI(
 )
 
 # Modelo de datos de entrada (sin 'y' — la target)
+
+
 class ClientData(BaseModel):
-    age: float
-    month: int
-    day_of_week: int
-    duration: float
+    age: float = Field(ge=0, lt=120)
+    month: int = Field(ge=1, le=12)
+    day_of_week: int = Field(ge=1, le=7)
+    duration: float = Field(ge=0)
     campaign: float
     pdays: float
     previous: float
@@ -100,7 +101,7 @@ def info() -> Dict:
 @app.post("/predict")
 def predict(input_data: ClientData):
     try:
-        prediction = predict_pipeline(input_data.dict())
+        prediction = predict_pipeline(input_data.model_dump())
         return {
             "prediction": prediction,
             "model_version": model_version,

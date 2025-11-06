@@ -4,7 +4,7 @@ import pandas as pd
 import threading
 from datetime import datetime
 from prefect import flow, task, get_run_logger
-from model.model import predict_pipeline, __version__ as model_version
+from scr.app.model.model import predict_pipeline, __version__ as model_version
 
 router = APIRouter(tags=["General Endpoints"])
 
