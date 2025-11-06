@@ -40,7 +40,7 @@ jobs:
 
       - name: Run Docker container (health check)
         run: |
-          docker run -d -p 8000:80 --name bancox_test bancox:ci
+          docker run -d -p 8000:8000 --name bancox_test bancox:ci
           echo "Esperando 5 segundos..."
           sleep 5
           echo "Verificando endpoint /health"
