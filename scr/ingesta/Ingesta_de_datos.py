@@ -8,6 +8,7 @@ from scr.ingesta.encoding import enc_preprocessor
 from scr.ingesta.esquema_DB import definir_esquema
 from prefect import flow, task, get_run_logger
 from pathlib import Path
+from scr.utils.errors import handle_exceptions
 
 
 load_dotenv()
@@ -53,6 +54,11 @@ def load_data():
 
     return str(path)
 
+
+# Decorar las versiones sin Prefect para que los tests y scripts directos
+# registren excepciones de forma consistente sin interferir con Prefect.
+load_data = handle_exceptions(default=None, reraise=False)(load_data)
+
 def remove_duplicates_raw(path_raw: str):
     """Versión sin Prefect de remove_duplicates para testing"""
     df = pd.read_parquet(path_raw)
@@ -64,6 +70,10 @@ def remove_duplicates_raw(path_raw: str):
     df.to_parquet(path, index=False)
     
     return str(path)
+
+
+# versión no-prefect decorada para manejo uniforme de errores en tests
+remove_duplicates_raw = handle_exceptions(default=None, reraise=False)(remove_duplicates_raw)
 
 @task(name="Eliminar duplicados")
 def remove_duplicates(path_raw: str):

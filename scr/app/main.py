@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from typing import Dict
 import platform
 from scr.app.model.model import predict_pipeline, __version__ as model_version
+from scr.utils.errors import handle_exceptions
 
 app = FastAPI(
     title="Banco X API",
@@ -57,6 +58,7 @@ def _is_model_ready() -> bool:
 
 
 @app.get("/")
+@handle_exceptions(reraise=True)
 def home() -> Dict:
     return {
         "message": "✅ La API está levantada y corriendo!",
@@ -65,18 +67,21 @@ def home() -> Dict:
 
 
 @app.get("/ping")
+@handle_exceptions(reraise=True)
 def ping() -> Dict:
     """Endpoint simple para comprobación rápida de latencia/respuesta."""
     return {"ping": "pong"}
 
 
 @app.get("/healthz")
+@handle_exceptions(reraise=True)
 def healthz() -> Dict:
     """Health check básico: responde 200 si la app está corriendo."""
     return {"status": "ok"}
 
 
 @app.get("/readyz")
+@handle_exceptions(reraise=True)
 def readyz() -> Dict:
     """Readiness: indica si el servicio está listo para recibir tráfico productivo.
     Comprueba de forma liviana si el modelo parece estar disponible.
@@ -89,6 +94,7 @@ def readyz() -> Dict:
 
 
 @app.get("/info")
+@handle_exceptions(reraise=True)
 def info() -> Dict:
     """Información del servicio y entorno."""
     return {
@@ -99,6 +105,7 @@ def info() -> Dict:
 
 
 @app.post("/predict")
+@handle_exceptions(reraise=True)
 def predict(input_data: ClientData):
     try:
         prediction = predict_pipeline(input_data.model_dump())

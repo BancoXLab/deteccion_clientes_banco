@@ -5,6 +5,7 @@ import threading
 from datetime import datetime
 from prefect import flow, task, get_run_logger
 from scr.app.model.model import predict_pipeline, __version__ as model_version
+from scr.utils.errors import handle_exceptions
 
 router = APIRouter(tags=["General Endpoints"])
 
@@ -49,16 +50,20 @@ def log_prediction_to_prefect(input_data: dict, prediction: float):
     logger.info(f"Input: {input_data}")
     logger.info("✅ Registro completado.")
 
+
+
 @flow(name="Flow de inferencia Banco X")
 def inference_flow(input_data: dict, prediction: float):
     log_prediction_to_prefect(input_data, prediction)
 
 # Endpoints
 @router.get("/ping")
+@handle_exceptions(reraise=True)
 def ping():
     return {"ping": "pong"}
 
 @router.post("/predict")
+@handle_exceptions(reraise=True)
 def predict(input_data: ClientData):
     try:
         input_dict = input_data.dict()
