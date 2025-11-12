@@ -95,14 +95,14 @@ class ClientData(BaseModel):
         if field_name in FIELD_TYPES["int_fields"]:
             if not isinstance(value, int) or isinstance(value, bool):
                 raise TypeError(
-                    f"❌ Campo '{field_name}' debe ser un número ENTERO (int).\n"
+                    f"   Campo '{field_name}' debe ser un número ENTERO (int).\n"
                     f"   Recibió: {type(value).__name__} = {value}\n"
                     f"   Ejemplos válidos: 0, 1, 2, 12, -1"
                 )
         elif field_name in FIELD_TYPES["float_fields"]:
             if not isinstance(value, (int, float)) or isinstance(value, bool):
                 raise TypeError(
-                    f"❌ Campo '{field_name}' debe ser un número (int o float).\n"
+                    f"   Campo '{field_name}' debe ser un número (int o float).\n"
                     f"   Recibió: {type(value).__name__} = {value}\n"
                     f"   Ejemplos válidos: 25.5, 100, 3.14, -1.5"
                 )

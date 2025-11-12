@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from scr.app.schemas import ClientData
+from pydantic import BaseModel
 import pandas as pd
 import threading
 from datetime import datetime
@@ -9,18 +9,22 @@ from scr.utils.errors import handle_exceptions
 
 router = APIRouter(tags=["General Endpoints"])
 
-# Modelo de datos: importado desde scr.app.schemas.ClientData
+class ClientData(BaseModel):
+    """Modelo mínimo de entrada. Acepta campos extra para compatibilidad.
+    Reemplaza por la versión con validaciones si la vuelves a crear.
+    """
+    model_config = {"extra": "allow"}
 
 # Prefect 
 @task
 def log_prediction_to_prefect(input_data: dict, prediction: float):
     logger = get_run_logger()
-    logger.info("📦 Registrando inferencia en Prefect...")
+    logger.info("Registrando inferencia en Prefect...")
     logger.info(f"Timestamp: {datetime.now()}")
     logger.info(f"Modelo: {model_version}")
     logger.info(f"Predicción: {prediction}")
     logger.info(f"Input: {input_data}")
-    logger.info("✅ Registro completado.")
+    logger.info("Registro completado.")
 
 
 

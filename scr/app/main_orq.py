@@ -79,7 +79,7 @@ def health_check_flow() -> Dict:
 # ---- Endpoints Prefect ----
 @app.get("/")
 def home() -> Dict:
-    return {"message": "✅ La API está levantada y corriendo!", "model_version": model_version}
+    return {"message": "La API está levantada y corriendo!", "model_version": model_version}
 
 @app.get("/healthz")
 def healthz() -> Dict:
@@ -120,7 +120,11 @@ def info() -> Dict:
             "prefect_enabled": True
         }
 
-from scr.app.schemas import ClientData
+class ClientData(BaseModel):
+    """Modelo mínimo de entrada. Acepta campos extra para compatibilidad.
+    Si prefieres las validaciones avanzadas, restaura `scr.app.schemas.ClientData`.
+    """
+    model_config = {"extra": "allow"}
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi import Request
@@ -134,7 +138,7 @@ def predict(input_data: ClientData) -> Dict[str, Any]:
         return {
             "success": True,
             "prediction": float(prediction),
-            "prediction_label": "Se suscribirá ✅" if int(prediction) == 1 else "No se suscribirá",
+            "prediction_label": "Se suscribirá" if int(prediction) == 1 else "No se suscribirá",
             "model_version": model_version,
             "timestamp": datetime.now().isoformat(),
         }

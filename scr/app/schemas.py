@@ -78,7 +78,7 @@ class ClientData(BaseModel):
         field_name = info.field_name
         if value is None:
             raise ValueError(
-                f"❌ Campo '{field_name}' está vacío o nulo. Este campo es requerido y no puede estar vacío."
+                f"Campo '{field_name}' está vacío o nulo. Este campo es requerido y no puede estar vacío."
             )
         return value
 
@@ -89,12 +89,12 @@ class ClientData(BaseModel):
         if field_name in FIELD_TYPES["int_fields"]:
             if not isinstance(value, int) or isinstance(value, bool):
                 raise TypeError(
-                    f"❌ Campo '{field_name}' debe ser un número ENTERO (int). Recibió: {type(value).__name__} = {value}"
+                    f"Campo '{field_name}' debe ser un número ENTERO (int). Recibió: {type(value).__name__} = {value}"
                 )
         elif field_name in FIELD_TYPES["float_fields"]:
             if not isinstance(value, (int, float)) or isinstance(value, bool):
                 raise TypeError(
-                    f"❌ Campo '{field_name}' debe ser un número (int o float). Recibió: {type(value).__name__} = {value}"
+                    f"Campo '{field_name}' debe ser un número (int o float). Recibió: {type(value).__name__} = {value}"
                 )
         return value
 
@@ -107,7 +107,7 @@ class ClientData(BaseModel):
             try:
                 if not (min_val <= value <= max_val):
                     raise ValueError(
-                        f"❌ Campo '{field_name}' fuera de rango [{min_val}, {max_val}]. Valor: {value}"
+                        f"Campo '{field_name}' fuera de rango [{min_val}, {max_val}]. Valor: {value}"
                     )
             except TypeError:
                 # Si la comparación falla por tipo, dejar que la validación de tipo lo capture
