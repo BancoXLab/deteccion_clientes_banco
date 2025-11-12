@@ -1,9 +1,9 @@
 import platform
 import psutil
 import os
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 from datetime import datetime
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from fastapi import FastAPI, HTTPException
 from prefect import flow, task, get_run_logger
 from scr.app.model.model import predict_pipeline, __version__ as model_version
@@ -119,26 +119,67 @@ def info() -> Dict:
             "python": platform.python_version(),
             "prefect_enabled": True
         }
-    
-# ---- Validador general para todos los campos ----
-@field_validator("*", mode="before")
-def validar_tipos(cls, value: Any, info):
-    """Valida tipos antes de parsear, con mensaje personalizado."""
-    field_name = info.field_name
 
-    if value is None:
-        raise ValueError(f"El campo '{field_name}' no puede ser nulo.")
+from scr.app.schemas import ClientData
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi import Request
 
-    # Validar tipo esperado por nombre de campo
-    if field_name in ["month", "day_of_week", "previous_bin",
-                          "marital_divorced", "marital_married", "marital_single", "marital_unknown",
-                          "housing_no", "housing_unknown", "housing_yes",
-                          "loan_no", "loan_unknown", "loan_yes",
-                          "contact_cellular", "contact_telephone"]:
-        if not isinstance(value, int):
-            raise TypeError(f"El campo '{field_name}' debe ser un número entero (int).")
-    else:
-        if not isinstance(value, (float, int)):
-            raise TypeError(f"El campo '{field_name}' debe ser un número decimal (float).")
 
-    return value
+@app.post("/predict")
+def predict(input_data: ClientData) -> Dict[str, Any]:
+    try:
+        data_dict = input_data.model_dump()
+        prediction = predict_pipeline(data_dict)
+        return {
+            "success": True,
+            "prediction": float(prediction),
+            "prediction_label": "Se suscribirá ✅" if int(prediction) == 1 else "No se suscribirá",
+            "model_version": model_version,
+            "timestamp": datetime.now().isoformat(),
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail={
+            "error": "Error en los datos de entrada",
+            "message": str(e),
+            "status": "VALIDATION_ERROR",
+            "timestamp": datetime.now().isoformat()
+        })
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail={
+            "error": "Error en la predicción",
+            "message": str(e),
+            "status": "PREDICTION_ERROR",
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail={
+            "error": "Error inesperado",
+            "message": str(e),
+            "status": "INTERNAL_ERROR",
+            "timestamp": datetime.now().isoformat()
+        })
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = []
+    for err in exc.errors():
+        loc = ".".join([str(x) for x in err.get("loc", []) if x not in ("body",)])
+        msg = err.get("msg")
+        err_type = err.get("type")
+        friendly = msg
+        if err_type and "type_error" in err_type:
+            friendly = f"Tipo inválido para '{loc}': {msg}"
+        elif err_type and "value_error" in err_type:
+            friendly = f"Valor inválido para '{loc}': {msg}"
+        errors.append({"field": loc, "message": friendly, "raw": err})
+
+    return JSONResponse(status_code=422, content={
+        "success": False,
+        "error": "Validación de datos fallida",
+        "details": errors,
+        "status": "VALIDATION_ERROR",
+        "timestamp": datetime.now().isoformat(),
+        "hint": "Revisa los campos señalados y verifica tipos y rangos."
+    })

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from scr.app.schemas import ClientData
 import pandas as pd
 import threading
 from datetime import datetime
@@ -9,35 +9,7 @@ from scr.utils.errors import handle_exceptions
 
 router = APIRouter(tags=["General Endpoints"])
 
-# Modelo de datos
-class ClientData(BaseModel):
-    age: float
-    month: int
-    day_of_week: int
-    duration: float
-    campaign: float
-    pdays: float
-    previous: float
-    emp_var_rate: float
-    cons_price_idx: float
-    cons_conf_idx: float
-    euribor3m: float
-    nr_employed: float
-    previous_bin: int
-    job_target_mean: float
-    marital_divorced: int
-    marital_married: int
-    marital_single: int
-    marital_unknown: int
-    education_freq_encode: float
-    housing_no: int
-    housing_unknown: int
-    housing_yes: int
-    loan_no: int
-    loan_unknown: int
-    loan_yes: int
-    contact_cellular: int
-    contact_telephone: int
+# Modelo de datos: importado desde scr.app.schemas.ClientData
 
 # Prefect 
 @task
