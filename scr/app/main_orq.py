@@ -1,12 +1,11 @@
 import platform
 import psutil
 import os
-from pydantic import BaseModel
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any, List
 from fastapi import FastAPI, HTTPException
 from prefect import flow, task, get_run_logger
-from scr.app.model.model import predict_pipeline, __version__ as model_version
+from scr.app.model.model import predict_pipeline, predict_pipeline_proba, __version__ as model_version
 from scr.app.routes.general_routes import router as general_router
 
 app = FastAPI(
@@ -120,70 +119,71 @@ def info() -> Dict:
             "prefect_enabled": True
         }
 
-class ClientData(BaseModel):
-    """Modelo mínimo de entrada. Acepta campos extra para compatibilidad.
-    Si prefieres las validaciones avanzadas, restaura `scr.app.schemas.ClientData`.
-    """
-    model_config = {"extra": "allow"}
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-from fastapi import Request
-
 
 @app.post("/predict")
-def predict(input_data: ClientData) -> Dict[str, Any]:
+async def predict(input_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Predice para múltiples clientes y devuelve solo los con clase=1 (suscripción positiva).
+    Cada cliente puede tener un 'client_id' opcional para trackeo.
+    
+    Input: lista de objetos con campos del modelo + 'client_id' opcional.
+    Output: lista de predicciones con clase=1, ordenadas por probabilidad descendente.
+    """
     try:
-        data_dict = input_data.model_dump()
-        prediction = predict_pipeline(data_dict)
+        results = []
+        
+        for idx, client in enumerate(input_data):
+            try:
+                # client es un Dict, no un Pydantic model
+                client_id = client.pop("client_id", idx)  # usar client_id si existe, sino index
+                data_dict = client.copy()  # hacer copia para evitar modificar original
+                
+                # Predicción con probabilidades
+                pred_class, prob_0, prob_1 = predict_pipeline_proba(data_dict)
+                
+                # Solo incluir si la predicción es 1 (suscripción positiva)
+                if pred_class == 1:
+                    results.append({
+                        "client_id": client_id,
+                        "prediction": pred_class,
+                        "probability_class_0": prob_0,
+                        "probability_class_1": prob_1,
+                        "probability": prob_1,  # alias para acceso directo
+                        "timestamp": datetime.now().isoformat(),
+                    })
+            except (ValueError, RuntimeError) as e:
+                # Loguear error para este cliente pero continuar con los otros
+                results.append({
+                    "client_id": data_dict.get("client_id", idx),
+                    "error": str(e),
+                    "status": "PREDICTION_ERROR",
+                })
+            except Exception as e:
+                results.append({
+                    "client_id": data_dict.get("client_id", idx),
+                    "error": str(e),
+                    "status": "INTERNAL_ERROR",
+                })
+        
+        # Ordenar por probabilidad descendente
+        results_sorted = sorted(
+            results, 
+            key=lambda x: x.get("probability", 0) if "probability" in x else 0, 
+            reverse=True
+        )
+        
         return {
             "success": True,
-            "prediction": float(prediction),
-            "prediction_label": "Se suscribirá" if int(prediction) == 1 else "No se suscribirá",
+            "total_input": len(input_data),
+            "total_positive_predictions": len([r for r in results_sorted if "probability" in r]),
+            "results": results_sorted,
             "model_version": model_version,
             "timestamp": datetime.now().isoformat(),
         }
-    except ValueError as e:
-        raise HTTPException(status_code=422, detail={
-            "error": "Error en los datos de entrada",
-            "message": str(e),
-            "status": "VALIDATION_ERROR",
-            "timestamp": datetime.now().isoformat()
-        })
-    except RuntimeError as e:
-        raise HTTPException(status_code=500, detail={
-            "error": "Error en la predicción",
-            "message": str(e),
-            "status": "PREDICTION_ERROR",
-            "timestamp": datetime.now().isoformat()
-        })
     except Exception as e:
         raise HTTPException(status_code=500, detail={
-            "error": "Error inesperado",
+            "error": "Error inesperado procesando batch",
             "message": str(e),
             "status": "INTERNAL_ERROR",
             "timestamp": datetime.now().isoformat()
         })
-
-
-@app.exception_handler(RequestValidationError)
-async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
-    errors = []
-    for err in exc.errors():
-        loc = ".".join([str(x) for x in err.get("loc", []) if x not in ("body",)])
-        msg = err.get("msg")
-        err_type = err.get("type")
-        friendly = msg
-        if err_type and "type_error" in err_type:
-            friendly = f"Tipo inválido para '{loc}': {msg}"
-        elif err_type and "value_error" in err_type:
-            friendly = f"Valor inválido para '{loc}': {msg}"
-        errors.append({"field": loc, "message": friendly, "raw": err})
-
-    return JSONResponse(status_code=422, content={
-        "success": False,
-        "error": "Validación de datos fallida",
-        "details": errors,
-        "status": "VALIDATION_ERROR",
-        "timestamp": datetime.now().isoformat(),
-        "hint": "Revisa los campos señalados y verifica tipos y rangos."
-    })
