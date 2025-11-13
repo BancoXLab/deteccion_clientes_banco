@@ -5,21 +5,20 @@ FROM python:3.12-slim
 ENV PYTHONPATH="/app"
 
 WORKDIR /app
-COPY ./scr /app/scr
-COPY ./scr/app /app/scr/app
 
 # Copiar requirements primero (para aprovechar cache de Docker)
-COPY ./config /app/config
-COPY ./requirements.lock /app/requirements.lock
+COPY scr/app/requirements.txt .
+RUN python -m venv venv
 
 # Instalar dependencias
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r /app/requirements.lock
+RUN /bin/bash -c "source venv/bin/activate"
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Copiar todo el código de la app
-COPY ./scr/app /app
+COPY . .
 
 # Exponer el puerto donde correrá FastAPI (8000 recomendado)
 EXPOSE 8000
 
 # Comando de inicio
-CMD ["uvicorn", "scr.app.main_orq:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main_orq:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
