@@ -97,6 +97,35 @@ pip install -r requirements.txt
 pip install streamlit pandas numpy scikit-learn imbalanced-learn xgboost plotly mlflow uvicorn fastapi
 ```
 
+### Opción 1: Interfaz de Streamlit (Recomendado para usuarios)
+La aplicación incluye una interfaz web moderna construida con **Streamlit** que permite:
+- Hacer predicciones individuales en tiempo real
+- Procesar lotes de clientes desde un CSV
+- Visualizar resultados con gráficos interactivos
+- Descargar resultados
+
+**Instalación de dependencias:**
+```bash
+pip install -r streamlit_requirements.txt
+```
+
+**Ejecutar la interfaz:**
+```bash
+# En Linux/Mac
+./run_streamlit.sh
+
+# O directamente
+streamlit run streamlit_app.py
+
+# En Windows
+run_streamlit.bat
+```
+
+La aplicación se abrirá en `http://localhost:8501`
+
+Para más información, consulta [STREAMLIT_README.md](STREAMLIT_README.md)
+
+### Opción 2: Dashboard de MLflow (Para analistas)
 1. Ejecutar el notebook `MVP+Dashboard.ipynb` para generar los archivos base (`metrics.csv`, `clientes_segmentados.csv`, etc.).
 2. Ejecutar el dashboard con:
 ```bash
