@@ -40,11 +40,12 @@ jobs:
 
       - name: Run Docker container (health check)
         run: |
-          docker run -d -p 8000:80 --name bancox_test bancox:ci
-          echo "Esperando 5 segundos..."
-          sleep 5
-          echo "Verificando endpoint /health"
-          curl -f http://127.0.0.1:8000/health
+          docker run -d -p 8000:8000 --name bancox_test bancox:ci
+          echo "Esperando 15 segundos para que la app se inicie..."
+          sleep 15
+          echo "Verificando endpoint /healthz"
+          curl -v http://localhost:8000/healthz || (echo "Health check falló"; docker logs bancox_test; exit 1)
+          echo ""
           echo "Health check OK ✅"
         shell: bash
 

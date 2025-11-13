@@ -192,13 +192,16 @@ def test_age_string():
     try:
         result = ClientData(**data)
         print("✅ Validación pasó (no esperado)")
-    except ValidationError as e:
+    except (ValidationError, TypeError) as e:
         print("\n🔴 ERROR DE VALIDACIÓN CAPTURADO:")
-        for error in e.errors():
-            field = error.get("loc", ("desconocido",))[0]
-            msg = error.get("msg", "Error desconocido")
-            print(f"\n   Campo: {field}")
-            print(f"   Mensaje: {msg}")
+        if isinstance(e, ValidationError):
+            for error in e.errors():
+                field = error.get("loc", ("desconocido",))[0]
+                msg = error.get("msg", "Error desconocido")
+                print(f"\n   Campo: {field}")
+                print(f"   Mensaje: {msg}")
+        else:
+            print(f"   {str(e)}")
 
 
 def test_age_nulo():
@@ -209,13 +212,16 @@ def test_age_nulo():
     try:
         result = ClientData(**data)
         print("✅ Validación pasó (no esperado)")
-    except ValidationError as e:
+    except (ValidationError, TypeError, ValueError) as e:
         print("\n🔴 ERROR DE VALIDACIÓN CAPTURADO:")
-        for error in e.errors():
-            field = error.get("loc", ("desconocido",))[0]
-            msg = error.get("msg", "Error desconocido")
-            print(f"\n   Campo: {field}")
-            print(f"   Mensaje: {msg}")
+        if isinstance(e, ValidationError):
+            for error in e.errors():
+                field = error.get("loc", ("desconocido",))[0]
+                msg = error.get("msg", "Error desconocido")
+                print(f"\n   Campo: {field}")
+                print(f"   Mensaje: {msg}")
+        else:
+            print(f"   {str(e)}")
 
 
 def test_month_fuera_rango():
@@ -243,13 +249,16 @@ def test_month_float():
     try:
         result = ClientData(**data)
         print("✅ Validación pasó (no esperado)")
-    except ValidationError as e:
+    except (ValidationError, TypeError) as e:
         print("\n🔴 ERROR DE VALIDACIÓN CAPTURADO:")
-        for error in e.errors():
-            field = error.get("loc", ("desconocido",))[0]
-            msg = error.get("msg", "Error desconocido")
-            print(f"\n   Campo: {field}")
-            print(f"   Mensaje: {msg}")
+        if isinstance(e, ValidationError):
+            for error in e.errors():
+                field = error.get("loc", ("desconocido",))[0]
+                msg = error.get("msg", "Error desconocido")
+                print(f"\n   Campo: {field}")
+                print(f"   Mensaje: {msg}")
+        else:
+            print(f"   {str(e)}")
 
 
 def test_binary_invalid():

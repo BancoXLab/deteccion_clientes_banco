@@ -5,6 +5,11 @@ from pathlib import Path
 ALERTS = Path("scr/ops/alerts.log")
 app = Flask(__name__)
 
+@app.route("/")
+def index():
+    return "Alert service is running", 200
+
+
 @app.route("/alerts")
 def alerts():
     if not ALERTS.exists():
