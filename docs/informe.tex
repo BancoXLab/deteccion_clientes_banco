@@ -3,7 +3,7 @@
 % ======== PACKAGES ========
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{times} % Tipografía similar al paper
+\usepackage{lmodern} % Tipografía moderna compatible
 \usepackage{geometry}
 \usepackage{setspace}
 \usepackage{titlesec}
@@ -11,25 +11,22 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{enumitem}
-\usepackage{sectsty}
 \usepackage{xcolor}
 \usepackage{url}
 
 % ======== PAGE SETUP ========
 \geometry{margin=1in}
-\setstretch{1.1}
+\setstretch{1.2}
 
 % ======== HEADER ========
 \pagestyle{fancy}
-\fancyhf{}\fancyhead[C]{\small International Journal of Artificial Intelligence and Machine Learning\\
-Volume 13 • Issue 1 • January–December 2024}
+\fancyhf{}
+\fancyhead[C]{\small Laboratorio y Consultoría de Datos II \\ Agosto–Diciembre 2025}
 \fancyfoot[C]{\thepage}
 
-% ======== SECTION STYLE ========
-\sectionfont{\normalsize\bfseries\uppercase}
-\subsectionfont{\itshape\normalsize}
-\titleformat{\section}[block]{\large\bfseries}{\thesection.}{1em}{\MakeUppercase}
-\titleformat{\subsection}[block]{\normalsize\bfseries}{\thesubsection.}{0.5em} 
+% ======== TITLE STYLE ========
+\titleformat{\section}{\large\bfseries\MakeUppercase}{\thesection.}{0.8em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.6em}{}
 
 % ======== HYPERLINKS ========
 \hypersetup{
@@ -40,30 +37,33 @@ Volume 13 • Issue 1 • January–December 2024}
 }
 
 % ======== TITLE ========
-\title{\textbf{\LARGE Rule Extraction in Trained Feedforward Deep Neural Networks:\\Integrating Cosine Similarity and Logic for Explainability}}
+\title{\textbf{\LARGE Detección de Clientes: Suscripción de Depósito Bancario}}
 \author{
-    \normalsize Pablo Ariel Negro\\[-0.2em]
-    \normalsize \href{https://orcid.org/0000-0002-1216-2651}{https://orcid.org/0000-0002-1216-2651}\\[-0.2em]
-    \normalsize Universidad Abierta Interamericana, Argentina
+    \normalsize Facundo Casas\\[-0.2em]
+    \href{mailto:facundocasas@uca.edu.ar}{facundocasas@uca.edu.ar}\\[0.5em]
+    \normalsize Universidad Católica Argentina
     \and
-    \normalsize Claudia Pons\\[-0.2em]
-    \normalsize \href{https://orcid.org/0000-0003-1149-0976}{https://orcid.org/0000-0003-1149-0976}\\[-0.2em]
-    \normalsize Universidad Abierta Interamericana, Argentina
+    \normalsize Javier Balda\\[-0.2em]
+    \href{mailto:javierbalda@uca.edu.ar}{javierbalda@uca.edu.ar}\\[0.5em]
+    \normalsize Universidad Católica Argentina
+    \and
+    \normalsize Juan Caracoix\\[-0.2em]
+    \href{mailto:juancaracoix@uca.edu.ar}{juancaracoix@uca.edu.ar}\\[0.5em]
+    \normalsize Universidad Católica Argentina
 }
-\date{} 
+\date{}
 
 % ======== DOCUMENT ========
 \begin{document}
 
 \maketitle
-\vspace{-1em}
 
 \noindent\rule{\textwidth}{0.4pt}
 \vspace{1em}
 
 % ======== ABSTRACT ========
 \section*{Abstract}
-Explainability is a key aspect of machine learning, necessary for ensuring transparency and trust in decision-making processes. [...] 
+Explainability is a key aspect of machine learning, necessary for ensuring transparency and trust in decision-making processes. [...]
 
 % ======== KEYWORDS ========
 \vspace{1em}
@@ -74,51 +74,51 @@ Explainability is a key aspect of machine learning, necessary for ensuring trans
 
 % ======== INTRODUCTION ========
 \section{Introduction}
-Artificial deep neural networks (DNNs) have been empirically shown to have high predictive accuracy and perform well on various machine learning problems. [...] 
+Artificial deep neural networks (DNNs) have been empirically shown to have high predictive accuracy and perform well on various machine learning problems. [...]
 
 % ======== EXPLAINABILITY ========
 \section{Explainability}
-Explainability provides the foundation for interpreting how models generate outputs and identifying the reasoning behind predictions. [...] 
+Explainability provides the foundation for interpreting how models generate outputs and identifying the reasoning behind predictions. [...]
 
-% ======== COLOSSUS (Context Analysis, Scoped, Proposed Method) ========
+% ======== COLOSSUS Framework ========
 \section{COLOSSUS}
 
 \subsection{Context Analysis}
-The study examines how cosine similarity can be leveraged to analyze neural weights and biases. [...] 
+The study examines how cosine similarity can be leveraged to analyze neural weights and biases. [...]
 
 \subsection{Scoped}
-The scope of the COLOSSUS framework focuses on feedforward networks with fully connected layers. [...] 
+The scope of the COLOSSUS framework focuses on feedforward networks with fully connected layers. [...]
 
 \subsection{Proposed Method}
-The proposed method integrates cosine similarity and first-order logic (FOL) to generate interpretable rules. [...] 
+The proposed method integrates cosine similarity and first-order logic (FOL) to generate interpretable rules. [...]
 
 % ======== LIMITATIONS ========
-\section{Limitations of the Study and Future Work}
-While the approach provides interpretability, it relies on simplified network architectures. Future research will explore extending the model to recurrent or convolutional networks. [...] 
+\section{Limitations and Future Work}
+Future research will explore extending the model to recurrent or convolutional networks. [...]
 
 % ======== RELATED WORK ========
 \section{Related Work}
-Several prior studies have explored rule extraction from neural networks, including decision-tree surrogates and symbolic regression methods. [...] 
+Several prior studies have explored rule extraction from neural networks, including decision-tree surrogates and symbolic regression methods. [...]
 
 % ======== MAIN CONTRIBUTIONS ========
 \section{Main Contributions}
-This study contributes (1) a hybrid symbolic–numeric rule extraction algorithm, and (2) an interpretability metric using cosine similarity and entropy. [...] 
+This study contributes (1) a hybrid symbolic–numeric rule extraction algorithm, and (2) an interpretability metric using cosine similarity and entropy. [...]
 
 % ======== CONCLUSION ========
 \section{Conclusion}
-The integration of cosine similarity and logic-based reasoning enhances the explainability of trained deep neural networks, offering a balance between interpretability and predictive power. [...] 
+The integration of cosine similarity and logic-based reasoning enhances the explainability of trained deep neural networks. [...]
 
 % ======== CONFLICTS OF INTEREST ========
 \section*{Conflicts of Interest}
 The authors declare no conflict of interest.
 
-% ======== FUNDING STATEMENT ========
-\section*{Funding Statement}
+% ======== FUNDING ========
+\section*{Funding}
 This research received no external funding.
 
 % ======== PROCESS DATES ========
 \section*{Process Dates}
-Received: January 2024; Accepted: November 2024; Published: December 2024.
+Received: August 2025; Accepted: August 2025; Published: December 2025.
 
 % ======== CORRESPONDING AUTHOR ========
 \section*{Corresponding Author}
@@ -134,7 +134,7 @@ Pablo Ariel Negro (\href{mailto:pablo.negro@example.com}{pablo.negro@example.com
 \noindent DOI: 10.4018/IJAIML.347988
 
 \vspace{1em}
-\noindent\footnotesize
-This article is published as an Open Access article distributed under the terms of the Creative Commons Attribution License (\url{http://creativecommons.org/licenses/by/4.0/}), which permits unrestricted use, distribution, and production in any medium, provided the author of the original work and original publication source are properly credited.
+\footnotesize
+This article is published as an Open Access article under the CC-BY 4.0 license.
 
 \end{document}
