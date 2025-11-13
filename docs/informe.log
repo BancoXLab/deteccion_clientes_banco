@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.13)  13 NOV 2025 22:47
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.13)  13 NOV 2025 23:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -315,7 +315,7 @@ File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count278
 \l__pdf_internal_box=\box53
 )
-No file informe.aux.
+(./informe.aux)
 \openout1 = `informe.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 57.
@@ -336,6 +336,7 @@ LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 57.
 LaTeX Font Info:    ... okay on input line 57.
 LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 57.
 LaTeX Font Info:    ... okay on input line 57.
+
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
@@ -371,8 +372,10 @@ LaTeX Font Info:    ... okay on input line 57.
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 Package hyperref Info: Link coloring ON on input line 57.
+(./informe.out) (./informe.out)
 \@outlinefile=\write3
 \openout3 = `informe.out'.
+
 
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -430,11 +433,6 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf/fonts/enc/
 dvips/lm/lm-ec.enc}]
-Overfull \hbox (6.7837pt too wide) in paragraph at lines 101--102
-\T1/lmr/m/n/12 Several prior stud-ies have ex-plored rule ex-trac-tion from neu
--ral net-works, in-clud-ing decision-
- []
-
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 25.2232pt, for example:
@@ -459,32 +457,29 @@ L3 programming layer <2024-01-22>
  ***********
 
 
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-
 Package rerunfilecheck Warning: File `informe.out' has changed.
 (rerunfilecheck)                Rerun to get outlines right
 (rerunfilecheck)                or use package `bookmark'.
 
 Package rerunfilecheck Info: Checksums for `informe.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  389CB38081F3FA62887FF5EF5FD69431;1184.
+(rerunfilecheck)             Before: 389CB38081F3FA62887FF5EF5FD69431;1184
+(rerunfilecheck)             After:  AD17F26AFD87D9595621B02839ECC437;1324.
  ) 
 Here is how much of TeX's memory you used:
- 10492 strings out of 474222
- 161592 string characters out of 5748732
- 1930975 words of memory out of 5000000
- 32607 multiletter control sequences out of 15000+600000
+ 10511 strings out of 474222
+ 161839 string characters out of 5748732
+ 1931975 words of memory out of 5000000
+ 32620 multiletter control sequences out of 15000+600000
  598418 words of font info for 57 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,11n,87p,254b,443s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/ty
 pe1/public/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr
 /share/texmf/fonts/type1/public/lm/lmri12.pfb>
-Output written on informe.pdf (3 pages, 111527 bytes).
+Output written on informe.pdf (3 pages, 112234 bytes).
 PDF statistics:
- 61 PDF objects out of 1000 (max. 8388607)
- 47 compressed objects within 1 object stream
+ 92 PDF objects out of 1000 (max. 8388607)
+ 78 compressed objects within 1 object stream
  16 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 81 words of extra memory for PDF output out of 10000 (max. 10000000)
 
