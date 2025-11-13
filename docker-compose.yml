@@ -69,14 +69,11 @@ services:
     build: .
     container_name: bancox_dashboard
     ports:
-      - "8501:8501"
-    command: ["/app/venv/bin/streamlit", "run", "/app/scr/app/artifacts/monitor_dashboard.py", "--server.port=8501", "--server.address=0.0.0.0"]
+      - "8500:8500"
+    command: ["/app/venv/bin/streamlit", "run", "/app/scr/app/artifacts/monitor_dashboard.py", "--server.port=8500", "--server.address=0.0.0.0"]
     volumes:
       - ./scr:/app/scr
       - ./config:/app/config
       - ./data:/app/data
     depends_on:
-      alert-server:
-        condition: service_started
-    environment:
-      - PYTHONPATH=/app
+      - alert-server
