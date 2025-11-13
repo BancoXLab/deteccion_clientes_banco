@@ -27,7 +27,7 @@ TMP_DIR.mkdir(parents=True, exist_ok=True)
 def load_data():
     """Carga los datos desde la base de datos MySQL y los guarda como parquet."""
     logger = get_run_logger()
-    logger.info("📥 Conectando a la base de datos para cargar datos...")
+    logger.info(" Conectando a la base de datos para cargar datos...")
 
     try:
         engine = create_engine(
@@ -36,16 +36,16 @@ def load_data():
         )
 
         df = pd.read_sql_table(table_name="BancoX", con=engine)
-        logger.info(f"✅ Datos cargados: {df.shape[0]} filas y {df.shape[1]} columnas.")
+        logger.info(f" Datos cargados: {df.shape[0]} filas y {df.shape[1]} columnas.")
 
         path = TMP_DIR / "dataset_raw.parquet"
         df.to_parquet(path, index=False)
-        logger.info(f"📦 Guardado temporalmente en {path}")
+        logger.info(f" Guardado temporalmente en {path}")
 
         return str(path)
 
     except Exception as e:
-        logger.error(f"❌ Error al cargar los datos: {e}")
+        logger.error(f" Error al cargar los datos: {e}")
         raise
 
 def _safe_logger():
@@ -88,7 +88,7 @@ def apply_smote_raw(input_path: str, target_col: str = "y", target_per_class: in
 def apply_smote(path_raw: str):
     """Realiza oversampling con SMOTE y guarda el resultado como parquet."""
     logger = get_run_logger()
-    logger.info("🔄 Iniciando oversampling con SMOTE...")
+    logger.info(" Iniciando oversampling con SMOTE...")
 
     try:
         df = pd.read_parquet(path_raw)
@@ -104,11 +104,11 @@ def apply_smote(path_raw: str):
         path = TMP_DIR / "dataset_resampled.parquet"
         df_resampled.to_parquet(path, index=False)
 
-        logger.info(f"✅ SMOTE completo: {df_resampled.shape[0]} filas. Guardado en {path}")
+        logger.info(f" SMOTE completo: {df_resampled.shape[0]} filas. Guardado en {path}")
         return str(path)
 
     except Exception as e:
-        logger.error(f"❌ Error durante el oversampling: {e}")
+        logger.error(f" Error durante el oversampling: {e}")
         raise
 
 
@@ -116,7 +116,7 @@ def apply_smote(path_raw: str):
 def save_transformed_data(path_resampled: str):
     """Guarda los datos SMOTEados en una nueva tabla MySQL."""
     logger = get_run_logger()
-    logger.info("💾 Conectando para insertar datos transformados...")
+    logger.info(" Conectando para insertar datos transformados...")
 
     df = pd.read_parquet(path_resampled)
     engine = create_engine(
@@ -142,7 +142,7 @@ def save_transformed_data(path_resampled: str):
         logger.info(f"✅ Datos insertados correctamente. Total registros en DB: {count_db:,}")
 
     except Exception as e:
-        logger.error(f"❌ Error al insertar los datos: {e}")
+        logger.error(f" Error al insertar los datos: {e}")
 
 def clean_temp_files_raw(tmp_dir: str = None) -> None:
     """
@@ -163,9 +163,9 @@ def clean_temp_files():
     for f in TMP_DIR.glob("*.parquet"):
         try:
             f.unlink()
-            logger.info(f"🧹 Archivo temporal eliminado: {f}")
+            logger.info(f" Archivo temporal eliminado: {f}")
         except Exception as e:
-            logger.warning(f"⚠️ No se pudo eliminar {f}: {e}")
+            logger.warning(f" No se pudo eliminar {f}: {e}")
 
 
 # --------------------------------------------------------
@@ -176,14 +176,14 @@ def clean_temp_files():
 def train_pipeline():
     """Flujo principal: carga datos, aplica SMOTE y guarda resultados."""
     logger = get_run_logger()
-    logger.info("🚀 Iniciando pipeline de entrenamiento BancoX...")
+    logger.info(" Iniciando pipeline de entrenamiento BancoX...")
 
     path_raw = load_data()
     path_resampled = apply_smote(path_raw)
     save_transformed_data(path_resampled)
     clean_temp_files()
 
-    logger.info("🏁 Pipeline completado con éxito ✅")
+    logger.info(" Pipeline completado con éxito ✅")
 
 
 # --------------------------------------------------------

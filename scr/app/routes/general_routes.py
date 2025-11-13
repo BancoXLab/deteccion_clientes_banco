@@ -9,46 +9,22 @@ from scr.utils.errors import handle_exceptions
 
 router = APIRouter(tags=["General Endpoints"])
 
-# Modelo de datos
 class ClientData(BaseModel):
-    age: float
-    month: int
-    day_of_week: int
-    duration: float
-    campaign: float
-    pdays: float
-    previous: float
-    emp_var_rate: float
-    cons_price_idx: float
-    cons_conf_idx: float
-    euribor3m: float
-    nr_employed: float
-    previous_bin: int
-    job_target_mean: float
-    marital_divorced: int
-    marital_married: int
-    marital_single: int
-    marital_unknown: int
-    education_freq_encode: float
-    housing_no: int
-    housing_unknown: int
-    housing_yes: int
-    loan_no: int
-    loan_unknown: int
-    loan_yes: int
-    contact_cellular: int
-    contact_telephone: int
+    """Modelo mínimo de entrada. Acepta campos extra para compatibilidad.
+    Reemplaza por la versión con validaciones si la vuelves a crear.
+    """
+    model_config = {"extra": "allow"}
 
 # Prefect 
 @task
 def log_prediction_to_prefect(input_data: dict, prediction: float):
     logger = get_run_logger()
-    logger.info("📦 Registrando inferencia en Prefect...")
+    logger.info("Registrando inferencia en Prefect...")
     logger.info(f"Timestamp: {datetime.now()}")
     logger.info(f"Modelo: {model_version}")
     logger.info(f"Predicción: {prediction}")
     logger.info(f"Input: {input_data}")
-    logger.info("✅ Registro completado.")
+    logger.info("Registro completado.")
 
 
 
