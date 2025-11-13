@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.13)  13 NOV 2025 23:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.13)  13 NOV 2025 23:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -455,15 +455,8 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
-
-
-Package rerunfilecheck Warning: File `informe.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `informe.out':
-(rerunfilecheck)             Before: 389CB38081F3FA62887FF5EF5FD69431;1184
-(rerunfilecheck)             After:  AD17F26AFD87D9595621B02839ECC437;1324.
+Package rerunfilecheck Info: File `informe.out' has not changed.
+(rerunfilecheck)             Checksum: AD17F26AFD87D9595621B02839ECC437;1324.
  ) 
 Here is how much of TeX's memory you used:
  10511 strings out of 474222
@@ -476,7 +469,7 @@ Here is how much of TeX's memory you used:
 </usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/ty
 pe1/public/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr
 /share/texmf/fonts/type1/public/lm/lmri12.pfb>
-Output written on informe.pdf (3 pages, 112234 bytes).
+Output written on informe.pdf (3 pages, 112249 bytes).
 PDF statistics:
  92 PDF objects out of 1000 (max. 8388607)
  78 compressed objects within 1 object stream
