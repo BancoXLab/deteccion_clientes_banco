@@ -139,7 +139,7 @@ def save_transformed_data(path_resampled: str):
         )
 
         count_db = pd.read_sql("SELECT COUNT(*) AS total FROM BancoX_prepared_data", con=engine).iloc[0, 0]
-        logger.info(f"✅ Datos insertados correctamente. Total registros en DB: {count_db:,}")
+        logger.info(f" Datos insertados correctamente. Total registros en DB: {count_db:,}")
 
     except Exception as e:
         logger.error(f" Error al insertar los datos: {e}")

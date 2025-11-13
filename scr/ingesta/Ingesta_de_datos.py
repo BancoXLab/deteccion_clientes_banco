@@ -138,17 +138,27 @@ def transformar(path_nodupes: str):
 def escritura(path_clean: str, block_size=3000):
     """Carga el parquet limpio en la base de datos por bloques."""
     logger = get_run_logger()
-    logger.info("💾 Conectando a la base de datos...")
+    logger.info(" Conectando a la base de datos...")
 
     dataset_clean = pd.read_parquet(path_clean)
 
-    engine = create_engine(
-        f"mysql+pymysql://{os.getenv('user')}:{os.getenv('password')}@{os.getenv('host')}:{os.getenv('port')}/{os.getenv('db')}")
+    from sqlalchemy.engine import URL
+
+    connection_url = URL.create(
+        "mysql+pymysql",
+        username=os.getenv("user"),
+        password=os.getenv("password"),
+        host=os.getenv("host"),
+        port=int(12905), 
+        database=os.getenv("db")
+    )
+    logger.info(f" URL de conexión: {connection_url!r}")
+
+    engine = create_engine(connection_url)
+
 
     metadata, BancoX = definir_esquema()
     metadata.create_all(engine)
-
-    print(f"El dataset limpio tiene {dataset_clean.shape[0]} filas y {dataset_clean.columns} columnas.")
 
     #try:
     dataset_clean.to_sql(
@@ -162,7 +172,7 @@ def escritura(path_clean: str, block_size=3000):
     logger.info("✅ Datos insertados correctamente en BancoX.")
         # Verificación post-carga
     # except Exception as e:
-    #     logger.error(f"❌ Error al insertar los datos: {e}")
+    #     logger.error(f" Error al insertar los datos: {e}")
 
     
 
