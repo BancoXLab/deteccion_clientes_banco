@@ -14,8 +14,10 @@ from src.training.esquema_DB_train import definir_esquema_prepared
 # Cargar variables de entorno
 load_dotenv()
 
-# Carpeta temporal para Parquet
-TMP_DIR = Path("/tmp/bancox_train")
+# Carpeta temporal para Parquet (configurable vía env `BANCX_TMP_DIR`)
+import os
+
+TMP_DIR = Path(os.getenv("BANCX_TMP_DIR", "/tmp/bancox_train"))
 TMP_DIR.mkdir(parents=True, exist_ok=True)
 
 

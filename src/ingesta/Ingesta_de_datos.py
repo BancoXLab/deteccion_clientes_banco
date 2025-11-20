@@ -13,7 +13,10 @@ from src.utils.errors import handle_exceptions
 
 load_dotenv()
 
-TMP_DIR = Path("/tmp/etl_bancox")
+import os
+
+# Carpeta temporal para ETL (configurable vía env `BANCX_TMP_DIR`)
+TMP_DIR = Path(os.getenv("BANCX_TMP_DIR", "/tmp/etl_bancox"))
 TMP_DIR.mkdir(parents=True, exist_ok=True)
 
 

@@ -62,10 +62,13 @@ class APIClient:
         url = f"{self.base}/predict"
         
         try:
-            resp = requests.post(url, json=payload, timeout=timeout)
+            # The API expects a list (batch) of client dicts. Accept a single
+            # dict for convenience and wrap it into a list when needed.
+            to_send = payload if isinstance(payload, list) else [payload]
+            resp = requests.post(url, json=to_send, timeout=timeout)
             resp.raise_for_status()
             data = resp.json()
-            
+
             # Procesar respuesta exitosa
             if data.get("success", True):  # success puede estar ausente en algunas versiones
                 return PredictionResponse(
@@ -78,7 +81,7 @@ class APIClient:
                 )
             else:
                 raise ValueError(f"API error: {data.get('error', 'Unknown error')}")
-                
+
         except requests.HTTPError as e:
             # Manejar errores HTTP específicos
             try:
