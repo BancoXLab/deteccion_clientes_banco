@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.13)  13 NOV 2025 23:18
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.20)  20 NOV 2025 20:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -433,6 +433,23 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf/fonts/enc/
 dvips/lm/lm-ec.enc}]
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 8
+4.
+
+(/usr/share/texmf/tex/latex/lm/ts1lmr.fd
+File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1
+17.
+
+(/usr/share/texmf/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+Overfull \hbox (129.90971pt too wide) in paragraph at lines 120--122
+\T1/lmr/m/n/12 El mod-elo en-tre-nado se em-pa-queta como un pipeline se-ri-al-
+izado en \T1/lmtt/m/n/12 scr/app/model/trained_pipeline-0.1.0.pkl
+ []
+
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 25.2232pt, for example:
@@ -441,7 +458,25 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 (fancyhdr)                \addtolength{\topmargin}{-13.2232pt}.
 
-[2]
+[2{/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}]
+Overfull \hbox (1.97142pt too wide) in paragraph at lines 129--130
+\T1/lmr/m/n/12 La apli-cación web se im-ple-menta con FastAPI en \T1/lmtt/m/n/1
+2 scr/app/main.py \T1/lmr/m/n/12 y en \T1/lmtt/m/n/12 scr/app/routes\T1/lmr/m/n
+/12 .
+ []
+
+
+Overfull \hbox (26.27382pt too wide) in paragraph at lines 139--140
+[]\T1/lmr/m/n/12 El código in-cluye manejo de er-rores cen-tral-izado me-di-ant
+e el dec-o-rador \T1/lmtt/m/n/12 handle_exceptions
+ []
+
+
+Overfull \hbox (4.54099pt too wide) in paragraph at lines 146--147
+[]\T1/lmr/m/n/12 Guardado de los datos trans-for-ma-dos en una tabla MySQL prep
+arada (es-quema definido
+ []
+
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 25.2232pt, for example:
@@ -450,29 +485,126 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 (fancyhdr)                \addtolength{\topmargin}{-13.2232pt}.
 
-[3] (./informe.aux)
+[3]
+Overfull \hbox (141.24094pt too wide) in paragraph at lines 162--163
+[]\T1/lmr/m/n/12 Ejecutar el flow de en-tre-namiento me-di-ante Pre-fect o eje-
+cu-tando di-rec-ta-mente \T1/lmtt/m/n/12 scr/training/train_pipeline.py
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 25.2232pt, for example:
+(fancyhdr)                \setlength{\headheight}{25.2232pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-13.2232pt}.
+
+[4]
+Overfull \hbox (55.98256pt too wide) in paragraph at lines 173--174
+[]\T1/lmr/bx/n/12 Cliente / Apli-cación Fron-tend: \T1/lmr/m/n/12 re-al-iza so-
+lic-i-tudes de in-fer-en-cia y de es-tado (health/readiness).
+ []
+
+
+Overfull \hbox (0.90712pt too wide) in paragraph at lines 176--177
+\T1/lmr/m/n/12 leen/escriben en la base de datos y en el al-ma-ce-namiento tem-
+po-ral, y reg-is-tra telemetría
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 25.2232pt, for example:
+(fancyhdr)                \setlength{\headheight}{25.2232pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-13.2232pt}.
+
+[5]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 25.2232pt, for example:
+(fancyhdr)                \setlength{\headheight}{25.2232pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-13.2232pt}.
+
+[6]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 25.2232pt, for example:
+(fancyhdr)                \setlength{\headheight}{25.2232pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-13.2232pt}.
+
+[7]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 25.2232pt, for example:
+(fancyhdr)                \setlength{\headheight}{25.2232pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-13.2232pt}.
+
+[8] (./informe.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
-Package rerunfilecheck Info: File `informe.out' has not changed.
-(rerunfilecheck)             Checksum: AD17F26AFD87D9595621B02839ECC437;1324.
+
+
+Package rerunfilecheck Warning: File `informe.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `informe.out':
+(rerunfilecheck)             Before: 29FE664C6A1A6B75F7EA341154ABF5F4;2913
+(rerunfilecheck)             After:  C6BCAFC07579EA9365D9EFF2EC78B5FB;2425.
  ) 
 Here is how much of TeX's memory you used:
- 10511 strings out of 474222
- 161839 string characters out of 5748732
- 1931975 words of memory out of 5000000
- 32620 multiletter control sequences out of 15000+600000
- 598418 words of font info for 57 fonts, out of 8000000 for 9000
+ 10624 strings out of 474222
+ 163860 string characters out of 5748732
+ 1932975 words of memory out of 5000000
+ 32704 multiletter control sequences out of 15000+600000
+ 596121 words of font info for 58 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,11n,87p,254b,443s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/ty
-pe1/public/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr
-/share/texmf/fonts/type1/public/lm/lmri12.pfb>
-Output written on informe.pdf (3 pages, 112249 bytes).
+ 75i,11n,87p,907b,569s stack positions out of 10000i,1000n,20000p,200000b,200000s
+
+pdfTeX warning (dest): name{section.9} has been referenced but does not exist, 
+replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.5.1} has been referenced but does not ex
+ist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.6} has been referenced but does not ex
+ist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.5} has been referenced but does not ex
+ist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.4} has been referenced but does not ex
+ist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.3} has been referenced but does not ex
+ist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.4.2} has been referenced but does not ex
+ist, replaced by a fixed one
+
+</usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type
+1/public/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr/s
+hare/texmf/fonts/type1/public/lm/lmri12.pfb></usr/share/texmf/fonts/type1/publi
+c/lm/lmtt12.pfb>
+Output written on informe.pdf (8 pages, 157599 bytes).
 PDF statistics:
- 92 PDF objects out of 1000 (max. 8388607)
- 78 compressed objects within 1 object stream
- 16 named destinations out of 1000 (max. 500000)
- 81 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 168 PDF objects out of 1000 (max. 8388607)
+ 145 compressed objects within 2 object streams
+ 36 named destinations out of 1000 (max. 500000)
+ 153 words of extra memory for PDF output out of 10000 (max. 10000000)
 

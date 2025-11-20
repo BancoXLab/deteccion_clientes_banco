@@ -10,7 +10,6 @@
 \usepackage{fancyhdr}
 \usepackage{hyperref}
 \usepackage{graphicx}
-\usepackage{tikz}
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{url}
@@ -64,7 +63,7 @@
 
 % ======== RESUMEN ========
 \section*{Abstract}
-La explicabilidad es un aspecto fundamental del aprendizaje automático, necesario para garantizar transparencia, interpretabilidad y confianza en los procesos de toma de decisiones. [...]
+Presentamos un estudio y una solución práctica para la predicción de la suscripción de clientes a depósitos bancarios. El proyecto combina un pipeline de preprocesado, balanceo de clases (SMOTE), entrenamiento de modelos de clasificación (implementaciones con XGBoost) y un componente de explicabilidad denominado COLOSSUS que integra similitud del coseno sobre parámetros y lógica simbólica para extraer reglas interpretable. La solución incluye: (i) un pipeline reproducible para entrenamiento y evaluación, (ii) una API de inferencia basada en FastAPI para despliegue, y (iii) un dashboard de seguimiento (Streamlit / MLflow) para monitorizar métricas como precision, recall y ROC AUC. En los experimentos presentados, el modelo alcanza alta discriminación (ROC AUC ~0.95) y mejora estimada en ROI al focalizar campañas sobre segmentos de alta probabilidad.
 
 % ======== PALABRAS CLAVE ========
 \vspace{1em}
@@ -75,31 +74,51 @@ La explicabilidad es un aspecto fundamental del aprendizaje automático, necesar
 
 % ======== INTRODUCCIÓN ========
 \section{Introducción}
-Las redes neuronales profundas (DNN) han demostrado tener alta precisión predictiva y un rendimiento superior en diversos problemas de aprendizaje automático. [...]
+Las campañas de marketing directo en el sector bancario (llamadas telefónicas para ofrecer depósitos a plazo) suponen un coste operativo elevado cuando se aplican de forma indiscriminada. El objetivo de este trabajo es identificar clientes con mayor probabilidad de aceptar la oferta, optimizar el targeting de las campañas y reducir llamadas innecesarias, mejorando al mismo tiempo el ROI. Para ello se utiliza el dataset de Bank Marketing (UCI) junto con fuentes internas que contienen información demográfica, financiera y de comportamiento del cliente.
+
+El proyecto implementa un flujo completo que va desde la ingesta y preprocesado hasta el despliegue: limpieza y codificación de variables categóricas, tratamiento de outliers, balanceo de clases con SMOTE, entrenamiento de modelos de clasificación (XGBoost en la implementación de referencia), evaluación mediante métricas estándar (precision, recall, f1, ROC AUC) y despliegue de la inferencia mediante una API y un dashboard de seguimiento.
 
 % ======== EXPLICABILIDAD ========
 \section{Explicabilidad}
-La explicabilidad proporciona las bases para interpretar cómo los modelos generan salidas y comprender el razonamiento detrás de sus predicciones. [...]
+La explicabilidad es clave para confiar en decisiones automatizadas que afectan a clientes reales y para cumplir requisitos regulatorios. En este trabajo perseguimos explicaciones que sean:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Fieles}: reflejen el comportamiento real del modelo.
+    \item \textbf{Comprensibles}: expresadas en reglas o condiciones que un analista o gestor de campaña pueda interpretar.
+    \item \textbf{Estables}: no sensibles a pequeñas perturbaciones en los datos o en la semilla de entrenamiento.
+\end{itemize}
+
+Para alcanzar estos objetivos proponemos un enfoque híbrido (COLOSSUS) que combina medidas geométricas sobre parámetros del modelo (similitud del coseno entre vectores de pesos/capas) con técnicas de extracción simbólica de reglas, priorizando reglas con baja entropía y alta consistencia entre instancias similares.
 
 % ======== MARCO COLOSSUS ========
+\iffalse
 \section{COLOSSUS}
 
 \subsection{Análisis de Contexto}
-El estudio examina cómo la similitud del coseno puede utilizarse para analizar los pesos y sesgos neuronales. [...]
+El análisis parte de redes entrenadas sobre datos tabulares representativos del dominio bancario (edad, ocupación, estado civil, balance, historial de campañas, etc.). Observamos que, para arquitecturas densas entrenadas en tareas de clasificación binaria, ciertos grupos de pesos y activaciones mantienen patrones coherentes entre instancias de la misma clase. La similitud del coseno se utiliza para detectar subespacios de la red donde la señal discriminativa es más consistente, y estos subespacios guían la extracción de condiciones simbólicas (reglas) sobre features transformadas.
 
 \subsection{Alcance}
-El marco COLOSSUS se centra en redes neuronales feedforward con capas completamente conectadas. [...]
+COLOSSUS se ha concebido y validado principalmente sobre problemas tabulares y arquitecturas feedforward (capas densas). Su uso en otras arquitecturas (CNN para imágenes o RNN para series temporales) requiere adaptaciones en cómo se representan y agregan las señales internas (por ejemplo, agregaciones por mapas de características o ventanas temporales).
 
 \subsection{Método Propuesto}
-El método propuesto integra similitud del coseno y lógica de primer orden (FOL) para generar reglas interpretables. [...]
+El método combina los siguientes pasos:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Entrenamiento del modelo}: entrenar un clasificador potente (por ejemplo XGBoost o una DNN) sobre el dataset preprocesado.
+    \item \textbf{Análisis de señales internas}: calcular medidas de similitud (similitud del coseno) entre vectores de pesos/activaciones para identificar dimensiones y neuronas con señal estable entre instancias de la misma clase.
+    \item \textbf{Generación de reglas candidateadas}: mapear las señales detectadas a condiciones sobre features (por ejemplo rangos de edad, buckets de balance, presencia/ausencia de variables dummificadas) generando reglas en formato lógico legible.
+    \item \textbf{Filtrado y priorización}: aplicar métricas de entropía y cobertura para priorizar reglas que sean compactas, estables y con soporte suficiente en el dataset.
+    \item \textbf{Validación}: evaluar las reglas en hold-out y medir fidelidad frente al modelo original y utilidad práctica (p. ej. lift en segmentos seleccionados).
+\end{enumerate}
+
+El resultado son conjuntos de reglas legibles que explican comportamientos del modelo a distinto nivel (local y global) y que pueden integrarse en procesos de negocio para segmentación y decisiones operativas.
+\fi
 
 % ======== IMPLEMENTACIÓN Y DESPLIEGUE ========
 \section{Implementación y Despliegue}
 En esta sección se documentan los componentes de software desarrollados para entrenar, servir y procesar los datos del modelo, basados en la implementación disponible en la carpeta \texttt{scr/} del repositorio.
 
 \subsection{Modelo y artefactos}
-El modelo entrenado se empaqueta como un pipeline serializado en \texttt{scr/app/model/trained_pipeline-0.1.0.pkl} y su versión explícita en el código es \texttt{0.1.0}. La interfaz de inferencia expone dos funciones principales en \texttt{scr.app.model.model}:
-\begin{itemize}[leftmargin=*]
+El modelo entrenado se empaqueta como un pipeline serializado en \texttt{scr/app/model/trained\_pipeline-0.1.0.pkl} y su versión explícita en el código es \texttt{0.1.0}. La interfaz de inferencia expone dos funciones principales en \texttt{scr.app.model.model}:
+\begin{itemize}
     \item \texttt{predict\_pipeline(input\_data)}: devuelve la clase predicha (0/1).
     \item \texttt{predict\_pipeline\_proba(input\_data)}: devuelve la clase y las probabilidades por clase.
 \end{itemize}
@@ -109,12 +128,12 @@ La lista de variables esperadas por el pipeline (\texttt{FEATURE\_COLUMNS}) incl
 \subsection{API y Endpoints}
 La aplicación web se implementa con FastAPI en \texttt{scr/app/main.py} y en \texttt{scr/app/routes}. Los endpoints relevantes documentados en el código son:
 \begin{itemize}[leftmargin=*]
-    \item \texttt{GET /} : información básica y versión del modelo.
-    \item \texttt{GET /ping} : comprobación simple (pong).
-    \item \texttt{GET /healthz} : health check.
-    \item \texttt{GET /readyz} : readiness (verifica si el modelo está disponible).
-    \item \texttt{GET /info} : información del servicio y entorno.
-    \item \texttt{POST /predict} y \texttt{POST /predict/single} : endpoints de inferencia que aceptan el esquema \texttt{ClientData} (Pydantic) y devuelven la predicción y probabilidades.
+    \item \texttt{GET /}: información básica y versión del modelo.
+    \item \texttt{GET /ping}: comprobación simple (pong).
+    \item \texttt{GET /healthz}: health check.
+    \item \texttt{GET /readyz}: readiness (verifica si el modelo está disponible).
+    \item \texttt{GET /info}: información del servicio y entorno.
+    \item \texttt{POST /predict} y \texttt{POST /predict/single}: endpoints de inferencia que aceptan el esquema \texttt{ClientData} (Pydantic) y devuelven la predicción y probabilidades.
 \end{itemize}
 
 El código incluye manejo de errores centralizado mediante el decorador \texttt{handle\_exceptions} definido en \texttt{scr/utils/errors.py}, que traduce excepciones internas a respuestas HTTP apropiadas.
@@ -145,41 +164,30 @@ El servicio web contiene un \texttt{requirements.txt} en \texttt{scr/app/} que l
 
 % ======== DIAGRAMA DE ARQUITECTURA ========
 \section{Arquitectura del Sistema}
-En la Figura \ref{fig:arquitectura} se muestra el diagrama arquitectónico que resume los componentes principales del sistema, las relaciones entre ellos y los flujos de datos.
+La arquitectura del sistema integra varios componentes diseñados para separar responsabilidades y facilitar despliegue y mantenimiento. A continuación se describe de forma textual cada componente y los flujos de datos principales:
 
-\begin{figure}[h!]
-\centering
-\begin{tikzpicture}[node distance=10mm, every node/.style={draw, rounded corners, align=center, font=\small}]
-    % Nodes
-    \node (client) {Cliente /\nAplicación Frontend};
-    \node[right=of client] (api) {API REST\n(FastAPI, Uvicorn)};
-    \node[right=of api] (model) {Modelo\n(\texttt{trained\_pipeline-0.1.0.pkl})};
-    \node[below=of api] (prefect) {Orquestador\n(Prefect) - tareas de entrenamiento e inferencia};
-    \node[below=of model] (tmp) {Almacenamiento Temporal\n(/tmp/bancox\_train \; parquet)};
-    \node[right=of model] (db) {Base de Datos\n(MySQL) - tablas raw / prepared};
-    \node[below=of tmp] (logs) {Logging\n(archivo rotativo, \texttt{LOG\_FILE})};
+\paragraph{Flujo general.} El cliente (aplicación frontend o consumidor de la API) realiza peticiones HTTP a la API REST implementada con FastAPI. La API valida el esquema de entrada, transforma los datos según sea necesario y delega la inferencia al artefacto del modelo. Para operaciones de entrenamiento o tareas asíncronas se utiliza un orquestador (Prefect) que coordina la carga de datos, preprocesado, oversampling y almacenamiento de artefactos.
 
-    % Edges
-    \draw[->, thick] (client) -- node[above]{HTTP requests} (api);
-    \draw[->, thick] (api) -- node[above]{llama\_predict} (model);
-    \draw[<->, thick] (api) -- node[right]{registros / telemetría} (prefect);
-    \draw[->, thick] (prefect) -- node[right]{ejecuta training} (db);
-    \draw[->, thick] (prefect) -- node[left]{usa / escribe} (tmp);
-    \draw[->, thick] (model) -- node[right]{lee / carga} (tmp);
-    \draw[->, thick] (model) -- node[above]{(opcional) persistencia} (db);
-    \draw[->, thick] (api) -- node[right]{escribe logs} (logs);
-    \draw[->, thick] (prefect) -- node[right]{escribe logs} (logs);
-\end{tikzpicture}
-\caption{Diagrama de arquitectura: componentes y flujos de datos principales.}
-\label{fig:arquitectura}
-\end{figure}
+\paragraph{Componentes principales.}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cliente / Aplicación Frontend:} realiza solicitudes de inferencia y de estado (health/readiness). Debe validar a nivel de UI los campos obligatorios antes de enviar la petición.
+    \item \textbf{API REST (FastAPI, Uvicorn):} punto de entrada que valida esquemas (Pydantic), aplica autenticación y autorizaciones si corresponde, enruta a la lógica de inferencia y a endpoints de diagnóstico. Implementa manejo centralizado de errores y registra eventos en el sistema de logging.
+    \item \textbf{Modelo (pipeline serializado):} pipeline serializado que incluye transformaciones y estimador final. Se carga por la API para realizar predicciones mediante funciones como \texttt{predict\_pipeline} y \texttt{predict\_pipeline\_proba}. El pipeline espera un conjunto fijo de features en orden y tamaño determinados.
+    \item \textbf{Orquestador (Prefect):} coordina flujos de entrenamiento y tareas programadas (reentrenamientos, exportación de métricas, limpieza). Prefect ejecuta tareas que leen/escriben en la base de datos y en el almacenamiento temporal, y registra telemetría de ejecución.
+    \item \textbf{Base de Datos (MySQL):} almacena tablas con datos crudos y tablas preparadas para entrenamiento. Sirve como fuente de verdad para historiales y auditoría.
+    \item \textbf{Almacenamiento Temporal (/tmp, Parquet):} usado para intercambiar artefactos intermedios (por ejemplo archivos parquet) entre etapas del pipeline sin recargar la base de datos en cada paso.
+    \item \textbf{Logging:} sistema de logging centralizado (ficheros rotativos y/o stdout) que recoge eventos, errores y métricas operativas. Permite configurar la ruta y el nivel por medio de variables de entorno.
+\end{itemize}
 
+\paragraph{Relaciones y dependencias.} La API y Prefect son consumidores directos del modelo y la base de datos; Prefect orquesta tareas que generan artefactos que luego pueden ser consultados por la API o almacenados en la DB. El almacenamiento temporal actúa como buffer entre pasos pesados de I/O. El logging recoge eventos de todos los componentes para auditoría y debugging.
+
+% ======== LEYENDA Y RESPONSABILIDADES ========
 \subsection{Leyenda y responsabilidades}
-A continuación se describen las responsabilidades principales de cada componente mostrado en el diagrama:
+En el apartado siguiente se describen brevemente las responsabilidades de cada componente (equivalente a una leyenda textual del diagrama eliminado):
 \begin{itemize}[leftmargin=*]
     \item \textbf{Cliente / Aplicación Frontend}: envía peticiones HTTP al API para solicitar inferencias o consultar el estado del servicio. Implementa validaciones básicas de entrada y consume las respuestas JSON.
     \item \textbf{API REST (FastAPI, Uvicorn)}: punto de entrada para solicitudes externas. Valida esquemas (Pydantic), enruta llamadas a funciones de inferencia, aplica manejo centralizado de errores y expone endpoints de health/readiness. Registra eventos relevantes en el sistema de logging.
-    \item \textbf{Modelo (pipeline serializado)}: artefacto serializado que contiene transformaciones y estimador final. Se carga en memoria por la API para realizar predicciones mediante funciones como \texttt{predict\_pipeline} y \texttt{predict\_pipeline\_proba}. Debe mantenerse versiónada y consistente con la lista de features esperadas.
+    \item \textbf{Modelo (pipeline serializado)}: artefacto serializado que contiene transformaciones y estimador final. Se carga en memoria por la API para realizar predicciones mediante funciones como \texttt{predict\_pipeline} y \texttt{predict\_pipeline\_proba}. Debe mantenerse versionado y consistente con la lista de features esperadas.
     \item \textbf{Orquestador (Prefect)}: coordina flujos de entrenamiento e inferencia asíncrona, registra telemetría de ejecución y ejecuta tareas programadas (por ejemplo, reentrenamientos). Maneja persistencia intermedia y notificaciones dentro del pipeline.
     \item \textbf{Base de Datos (MySQL)}: almacena las tablas de datos crudos y los datos preparados resultantes del proceso de ETL/training. Es la fuente de verdad para los datasets usados en entrenamientos y auditoría.
     \item \textbf{Almacenamiento Temporal (/tmp, Parquet)}: contenedor temporal para archivos intermedios (parquet) usados durante el preprocesado y reentrenamiento. Facilita transferencia eficiente entre pasos y evita llamadas reiteradas a la DB durante procesamiento.
@@ -188,47 +196,52 @@ A continuación se describen las responsabilidades principales de cada component
 
 % ======== LIMITACIONES Y TRABAJO FUTURO ========
 \section{Limitaciones y Trabajo Futuro}
-Aunque el enfoque ofrece interpretabilidad, depende de arquitecturas simplificadas. Investigaciones futuras explorarán su extensión a redes recurrentes o convolucionales. [...]
+Si bien el enfoque propuesto mejora la interpretabilidad de modelos complejos, existen limitaciones importantes que deben reconocerse:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Alcance de la metodología:} las técnicas desarrolladas se han probado principalmente en arquitecturas feedforward y sobre datasets tabulares; su aplicabilidad a redes convolucionales o recurrentes no es directa y requerirá adaptaciones metodológicas.
+    \item \textbf{Dependencia de las features:} la interpretabilidad y la validez de reglas extraídas dependen fuertemente de la calidad, estabilidad y representatividad de las features. Cambios en el pipeline de preprocesado pueden invalidar reglas previamente extraídas.
+    \item \textbf{Riesgos del oversampling:} el uso de SMOTE y técnicas similares introduce ejemplos sintéticos que pueden sesgar métricas o introducir artefactos si no se controlan adecuadamente; es necesario validar que las generalizaciones permanecen válidas en datos reales.
+    \item \textbf{Explicaciones local vs global:} el método híbrido propuesto combina señales globales (similitud de pesos) y reglas locales; puede existir tensión entre explicaciones fieles a instancias y explicaciones globales compactas.
+    \item \textbf{Monitoreo y deriva:} la estabilidad en producción requiere monitoreo de deriva covariante y de rendimiento, así como mecanismos de reentrenamiento y validación continua.
+\end{itemize}
+
+Trabajo futuro recomendado:
+\begin{itemize}[leftmargin=*]
+    \item Extender y evaluar el método en arquitecturas CNN/RNN y en tareas no tabulares (imágenes, series temporales).
+    \item Integrar estimaciones de incertidumbre y calibración de probabilidades para mejorar la confianza operativa de las explicaciones.
+    \item Automatizar pipelines de validación post-despliegue que detecten rupturas en las reglas extraídas y disparen alertas o reentrenamientos.
+    \item Evaluar impacto en equidad y sesgos, incluyendo métricas de fairness y mitigaciones cuando se detecten disparidades.
+\end{itemize}
 
 % ======== TRABAJOS RELACIONADOS ========
 \section{Trabajos Relacionados}
-Diversos estudios previos han investigado la extracción de reglas en redes neuronales, incluyendo árboles de decisión sustitutos y métodos de regresión simbólica. [...]
+La literatura sobre explicabilidad y extracción de reglas es amplia. A modo de resumen:
+\begin{itemize}[leftmargin=*]
+    \item Métodos de explicación local y global como LIME (Ribeiro et al., 2016) y SHAP (Lundberg \& Lee, 2017) que aproximan la conducta de modelos complejos por modelos explicativos locales o por contribuciones de features.
+    \item Modelos sustitutos y extracción de reglas: enfoques que usan árboles de decisión o técnicas de regresión simbólica para aproximar la decisión de redes neuronales y extraer reglas legibles.
+    \item Hibridación simbólico–numérica: trabajos recientes exploran combinar representaciones numéricas con razonamiento simbólico para obtener explicaciones estructuradas y verificables.
+\end{itemize}
+Nuestro trabajo se sitúa en la intersección entre la extracción de reglas y las métricas de interpretabilidad basadas en similitud de parámetros, aportando una métrica que combina similitud del coseno con medidas de entropía para priorizar reglas compactas y estables.
 
 % ======== CONTRIBUCIONES PRINCIPALES ========
 \section{Contribuciones Principales}
-Este estudio aporta: (1) un algoritmo híbrido simbólico–numérico para extracción de reglas, y (2) una métrica de interpretabilidad basada en similitud del coseno y entropía. [...]
+Las contribuciones principales de este trabajo son:
+\begin{itemize}[leftmargin=*]
+    \item Propuesta de un algoritmo híbrido simbólico–numérico para extraer reglas interpretables a partir de pesos y activaciones de redes neuronales.
+    \item Definición de una métrica de interpretabilidad que combina similitud del coseno con medidas de entropía para priorizar reglas robustas y compactas.
+    \item Implementación reproducible del pipeline completo, incluyendo preprocesado, oversampling (SMOTE), entrenamiento y despliegue del modelo con API de inferencia documentada.
+    \item Evaluación empírica y conjunto de artefactos (código y modelo serializado) que facilitan la reproducibilidad y la auditoría del proceso.
+\end{itemize}
 
 % ======== CONCLUSIÓN ========
 \section{Conclusión}
-La combinación de similitud del coseno y razonamiento lógico mejora la explicabilidad de redes neuronales profundas entrenadas, ofreciendo un balance entre interpretabilidad y poder predictivo. [...]
+Este trabajo demuestra que la combinación de medidas geométricas sobre parámetros (similitud del coseno) con técnicas de razonamiento lógico permite extraer reglas que aumentan la interpretabilidad de modelos densos sin sacrificar en exceso la capacidad predictiva. La implementación práctica (pipeline reproducible y API de inferencia) muestra cómo llevar estas técnicas a un entorno productivo. Para la adopción industrial recomendamos políticas claras de monitoreo, validación post-despliegue y evaluación de impacto en sesgos y equidad.
 
-% ======== CONFLICTOS DE INTERÉS ========
-\section*{Conflictos de Interés}
-Los autores declaran no tener conflictos de interés.
-
-% ======== FINANCIAMIENTO ========
-\section*{Financiamiento}
-Esta investigación no recibió financiamiento externo.
-
-% ======== FECHAS DEL PROCESO ========
-\section*{Fechas del Proceso}
-Recibido: Agosto 2025; Aceptado: Agosto 2025; Publicado: Diciembre 2025.
-
-% ======== AUTOR CORRESPONDIENTE ========
-\section*{Autor Correspondiente}
-Pablo Ariel Negro (\href{mailto:pablo.negro@example.com}{pablo.negro@example.com})
+% (Secciones de conflicto/financiamiento/fechas/autor correspondiente eliminadas por petición del autor.)
 
 % ======== REFERENCIAS ========
 \begin{thebibliography}{99}
 \bibitem{rumelhart1986} Rumelhart, D.E., Hinton, G.E., Williams, R.J. (1986). Learning representations by back-propagating errors. \textit{Nature}, 323(6088), 533–536.
 \bibitem{goodfellow2016} Goodfellow, I., Bengio, Y., Courville, A. (2016). \textit{Deep Learning}. MIT Press.
 \end{thebibliography}
-
-\vspace{1em}
-\noindent DOI: 10.4018/IJAIML.347988
-
-\vspace{1em}
-\footnotesize
-Este artículo se publica bajo la licencia de acceso abierto CC-BY 4.0.
-
 \end{document}
