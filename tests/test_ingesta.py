@@ -1,6 +1,6 @@
 # tests/test_ingesta.py
 import pandas as pd
-from scr.ingesta.Ingesta_de_datos import remove_duplicates_raw
+from src.ingesta.Ingesta_de_datos import remove_duplicates_raw
 from prefect.testing.utilities import prefect_test_harness
 
 def test_remove_duplicates_creates_file(tmp_path):

@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 from sqlalchemy import Table
-from scr.ingesta.esquema_DB import definir_esquema
-from scr.training.esquema_DB_train import definir_esquema_prepared
+from src.ingesta.esquema_DB import definir_esquema
+from src.training.esquema_DB_train import definir_esquema_prepared
 from pathlib import Path
 
 SAMPLE_PQ = Path(os.getenv("CONTRACT_SAMPLE_PQ", "data/sample_parquet_for_contract_check.parquet"))

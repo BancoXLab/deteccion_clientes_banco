@@ -1,7 +1,7 @@
 import pandas as pd
 from prefect.testing.utilities import prefect_test_harness
-from scr.ingesta.Ingesta_de_datos import remove_duplicates_raw
-from scr.training.train_pipeline import apply_smote_raw
+from src.ingesta.Ingesta_de_datos import remove_duplicates_raw
+from src.training.train_pipeline import apply_smote_raw
 
 def test_prefect_like_flow(tmp_path):
     # preparar datos

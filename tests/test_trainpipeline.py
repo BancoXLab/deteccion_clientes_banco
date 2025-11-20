@@ -1,6 +1,6 @@
 # tests/test_train_pipeline.py
 import pandas as pd
-from scr.training.train_pipeline import apply_smote_raw, clean_temp_files_raw, TMP_DIR
+from src.training.train_pipeline import apply_smote_raw, clean_temp_files_raw, TMP_DIR
 
 def test_apply_smote_balances_classes(tmp_path):
     df = pd.DataFrame({

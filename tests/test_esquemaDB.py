@@ -1,5 +1,5 @@
-from scr.ingesta.esquema_DB import definir_esquema
-from scr.training.esquema_DB_train import definir_esquema_prepared
+from src.ingesta.esquema_DB import definir_esquema
+from src.training.esquema_DB_train import definir_esquema_prepared
 
 def test_definir_esquema_has_table():
     metadata, BancoX = definir_esquema()

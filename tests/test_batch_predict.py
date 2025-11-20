@@ -52,7 +52,7 @@ def main():
     # Prueba local (sin levantar servidor)
     print("Realizando predicciones locales (sin servidor)...\n")
 
-    from scr.app.model.model import predict_pipeline_proba
+    from src.app.model.model import predict_pipeline_proba
 
     results = []
     for idx, client in enumerate(test_data):

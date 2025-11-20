@@ -6,7 +6,7 @@ Ejecutar con: pytest scr/client/test_client.py -v
 
 import pytest
 from unittest.mock import patch, MagicMock
-from scr.client.client import APIClient, PredictionResponse
+from src.client.client import APIClient, PredictionResponse
 import requests
 
 

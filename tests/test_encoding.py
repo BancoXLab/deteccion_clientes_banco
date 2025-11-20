@@ -1,5 +1,5 @@
 # tests/test_encoding.py
-from scr.ingesta.encoding import enc_preprocessor
+from src.ingesta.encoding import enc_preprocessor
 import pandas as pd
 
 def test_enc_preprocessor_output_shape():

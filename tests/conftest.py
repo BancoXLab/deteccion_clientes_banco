@@ -8,7 +8,7 @@ from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from scr.ingesta.Ingesta_de_datos import load_data  # adapta si el nombre difiere
+from src.ingesta.Ingesta_de_datos import load_data  # adapta si el nombre difiere
 
 
 # ------------------------------------------------------------------

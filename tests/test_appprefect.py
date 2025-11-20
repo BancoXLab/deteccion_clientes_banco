@@ -1,7 +1,7 @@
 # tests/test_app_prefect.py
 import pytest
 from prefect.testing.utilities import prefect_test_harness
-from scr.app.main_orq import health_check_flow, check_model_status, get_system_metrics
+from src.app.main_orq import health_check_flow, check_model_status, get_system_metrics
 
 @pytest.fixture(autouse=True)
 def prefect_test_fixture():

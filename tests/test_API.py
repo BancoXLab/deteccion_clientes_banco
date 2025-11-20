@@ -9,7 +9,7 @@ import numpy as np
 repo_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.insert(0, repo_root)
 
-from scr.app.main import app
+from src.app.main import app
 
 client = TestClient(app)
 

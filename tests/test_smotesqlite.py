@@ -1,6 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine, text
-from scr.training.train_pipeline import apply_smote_raw
+from src.training.train_pipeline import apply_smote_raw
 
 def test_apply_smote_and_write_sqlite(tmp_path):
     # dataset pequeño con desbalance

@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
-from scr.ingesta.Ingesta_de_datos import remove_duplicates_raw
-from scr.ingesta.encoding import enc_preprocessor
+from src.ingesta.Ingesta_de_datos import remove_duplicates_raw
+from src.ingesta.encoding import enc_preprocessor
 
 def test_ingesta_to_encoding_roundtrip(tmp_path):
     # crear parquet de entrada
