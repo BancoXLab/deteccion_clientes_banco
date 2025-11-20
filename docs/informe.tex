@@ -10,6 +10,7 @@
 \usepackage{fancyhdr}
 \usepackage{hyperref}
 \usepackage{graphicx}
+\usepackage{tikz}
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{url}
@@ -91,6 +92,99 @@ El marco COLOSSUS se centra en redes neuronales feedforward con capas completame
 
 \subsection{Método Propuesto}
 El método propuesto integra similitud del coseno y lógica de primer orden (FOL) para generar reglas interpretables. [...]
+
+% ======== IMPLEMENTACIÓN Y DESPLIEGUE ========
+\section{Implementación y Despliegue}
+En esta sección se documentan los componentes de software desarrollados para entrenar, servir y procesar los datos del modelo, basados en la implementación disponible en la carpeta \texttt{scr/} del repositorio.
+
+\subsection{Modelo y artefactos}
+El modelo entrenado se empaqueta como un pipeline serializado en \texttt{scr/app/model/trained_pipeline-0.1.0.pkl} y su versión explícita en el código es \texttt{0.1.0}. La interfaz de inferencia expone dos funciones principales en \texttt{scr.app.model.model}:
+\begin{itemize}[leftmargin=*]
+    \item \texttt{predict\_pipeline(input\_data)}: devuelve la clase predicha (0/1).
+    \item \texttt{predict\_pipeline\_proba(input\_data)}: devuelve la clase y las probabilidades por clase.
+\end{itemize}
+
+La lista de variables esperadas por el pipeline (\texttt{FEATURE\_COLUMNS}) incluye columnas numéricas y variables dummificadas. Es crítico que los datos de entrada respeten este orden y la presencia de columnas; en caso de discrepancia el servicio devuelve errores indicando las columnas faltantes.
+
+\subsection{API y Endpoints}
+La aplicación web se implementa con FastAPI en \texttt{scr/app/main.py} y en \texttt{scr/app/routes}. Los endpoints relevantes documentados en el código son:
+\begin{itemize}[leftmargin=*]
+    \item \texttt{GET /} : información básica y versión del modelo.
+    \item \texttt{GET /ping} : comprobación simple (pong).
+    \item \texttt{GET /healthz} : health check.
+    \item \texttt{GET /readyz} : readiness (verifica si el modelo está disponible).
+    \item \texttt{GET /info} : información del servicio y entorno.
+    \item \texttt{POST /predict} y \texttt{POST /predict/single} : endpoints de inferencia que aceptan el esquema \texttt{ClientData} (Pydantic) y devuelven la predicción y probabilidades.
+\end{itemize}
+
+El código incluye manejo de errores centralizado mediante el decorador \texttt{handle\_exceptions} definido en \texttt{scr/utils/errors.py}, que traduce excepciones internas a respuestas HTTP apropiadas.
+
+\subsection{Pipeline de Entrenamiento}
+El flujo de entrenamiento está definido en \texttt{scr/training/train\_pipeline.py} y utiliza Prefect para orquestación. Los pasos principales son:
+\begin{itemize}[leftmargin=*]
+    \item Carga de datos desde una base MySQL mediante SQLAlchemy y guardado temporal en parquet.
+    \item Aplicación de oversampling (SMOTE) para balancear la variable objetivo (en la implementación se fuerza un mínimo por clase, por defecto se apunta a 10.000 ejemplos para la clase minoritaria en algunos pasos).
+    \item Guardado de los datos transformados en una tabla MySQL preparada (esquema definido en \texttt{scr/training/esquema\_DB\_train.py}).
+    \item Limpieza de archivos temporales en \texttt{/tmp/bancox\_train}.
+\end{itemize}
+
+El uso de SMOTE y el número objetivo por clase son decisiones de diseño que deben ser justificadas y validadas experimentalmente.
+
+\subsection{Procesamiento y Preprocesado}
+El módulo de procesamiento principal es una clase abstracta \texttt{Processor} definida en \texttt{scr/processing/processor.py}, con una implementación de ejemplo \texttt{ETLProcessor} que realiza validaciones básicas (comprobación de columnas esperadas), registro de columnas faltantes y limpieza ligera (eliminación de duplicados). Esta abstracción facilita crear pasos de ETL reproducibles y con logging estandarizado.
+
+\subsection{Registro y Monitoreo}
+El proyecto incluye un wrapper de logging en \texttt{scr/utils/log.py} que configura \texttt{logging} con un \texttt{RotatingFileHandler} y soporte para configurar fichero y nivel mediante variables de entorno (\texttt{LOG\_FILE}, \texttt{LOG\_LEVEL}). Prefect se utiliza para telemetría adicional en flujos y tareas asíncronas.
+
+\subsection{Requisitos y Ejecución}
+El servicio web contiene un \texttt{requirements.txt} en \texttt{scr/app/} que lista dependencias de la API. El pipeline de entrenamiento depende de paquetes adicionales como \texttt{pymysql}, \texttt{sqlalchemy}, \texttt{imblearn} y \texttt{prefect}. Para ejecutar localmente:
+\begin{itemize}[leftmargin=*]
+    \item Iniciar la API con Uvicorn apuntando a \texttt{scr.app.main:app}.
+    \item Ejecutar el flow de entrenamiento mediante Prefect o ejecutando directamente \texttt{scr/training/train\_pipeline.py} (requiere variables de entorno para MySQL).
+\end{itemize}
+
+% ======== DIAGRAMA DE ARQUITECTURA ========
+\section{Arquitectura del Sistema}
+En la Figura \ref{fig:arquitectura} se muestra el diagrama arquitectónico que resume los componentes principales del sistema, las relaciones entre ellos y los flujos de datos.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[node distance=10mm, every node/.style={draw, rounded corners, align=center, font=\small}]
+    % Nodes
+    \node (client) {Cliente /\nAplicación Frontend};
+    \node[right=of client] (api) {API REST\n(FastAPI, Uvicorn)};
+    \node[right=of api] (model) {Modelo\n(\texttt{trained\_pipeline-0.1.0.pkl})};
+    \node[below=of api] (prefect) {Orquestador\n(Prefect) - tareas de entrenamiento e inferencia};
+    \node[below=of model] (tmp) {Almacenamiento Temporal\n(/tmp/bancox\_train \; parquet)};
+    \node[right=of model] (db) {Base de Datos\n(MySQL) - tablas raw / prepared};
+    \node[below=of tmp] (logs) {Logging\n(archivo rotativo, \texttt{LOG\_FILE})};
+
+    % Edges
+    \draw[->, thick] (client) -- node[above]{HTTP requests} (api);
+    \draw[->, thick] (api) -- node[above]{llama\_predict} (model);
+    \draw[<->, thick] (api) -- node[right]{registros / telemetría} (prefect);
+    \draw[->, thick] (prefect) -- node[right]{ejecuta training} (db);
+    \draw[->, thick] (prefect) -- node[left]{usa / escribe} (tmp);
+    \draw[->, thick] (model) -- node[right]{lee / carga} (tmp);
+    \draw[->, thick] (model) -- node[above]{(opcional) persistencia} (db);
+    \draw[->, thick] (api) -- node[right]{escribe logs} (logs);
+    \draw[->, thick] (prefect) -- node[right]{escribe logs} (logs);
+\end{tikzpicture}
+\caption{Diagrama de arquitectura: componentes y flujos de datos principales.}
+\label{fig:arquitectura}
+\end{figure}
+
+\subsection{Leyenda y responsabilidades}
+A continuación se describen las responsabilidades principales de cada componente mostrado en el diagrama:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cliente / Aplicación Frontend}: envía peticiones HTTP al API para solicitar inferencias o consultar el estado del servicio. Implementa validaciones básicas de entrada y consume las respuestas JSON.
+    \item \textbf{API REST (FastAPI, Uvicorn)}: punto de entrada para solicitudes externas. Valida esquemas (Pydantic), enruta llamadas a funciones de inferencia, aplica manejo centralizado de errores y expone endpoints de health/readiness. Registra eventos relevantes en el sistema de logging.
+    \item \textbf{Modelo (pipeline serializado)}: artefacto serializado que contiene transformaciones y estimador final. Se carga en memoria por la API para realizar predicciones mediante funciones como \texttt{predict\_pipeline} y \texttt{predict\_pipeline\_proba}. Debe mantenerse versiónada y consistente con la lista de features esperadas.
+    \item \textbf{Orquestador (Prefect)}: coordina flujos de entrenamiento e inferencia asíncrona, registra telemetría de ejecución y ejecuta tareas programadas (por ejemplo, reentrenamientos). Maneja persistencia intermedia y notificaciones dentro del pipeline.
+    \item \textbf{Base de Datos (MySQL)}: almacena las tablas de datos crudos y los datos preparados resultantes del proceso de ETL/training. Es la fuente de verdad para los datasets usados en entrenamientos y auditoría.
+    \item \textbf{Almacenamiento Temporal (/tmp, Parquet)}: contenedor temporal para archivos intermedios (parquet) usados durante el preprocesado y reentrenamiento. Facilita transferencia eficiente entre pasos y evita llamadas reiteradas a la DB durante procesamiento.
+    \item \textbf{Logging (archivo rotativo, env vars)}: captura eventos, métricas y errores. Permite configurar fichero y nivel mediante variables de entorno (\texttt{LOG\_FILE}, \texttt{LOG\_LEVEL}). Prefect y la API escriben en este sistema para auditoría y debugging.
+\end{itemize}
 
 % ======== LIMITACIONES Y TRABAJO FUTURO ========
 \section{Limitaciones y Trabajo Futuro}
