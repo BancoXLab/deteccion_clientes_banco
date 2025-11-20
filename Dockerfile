@@ -2,20 +2,24 @@
 FROM python:3.12-slim
 
 # Establecer directorio de trabajo
+ENV PYTHONPATH="/app"
+ENV PATH="/app/venv/bin:$PATH"
+
 WORKDIR /app
 
-# Copiar requirements primero (para aprovechar cache de Docker)
-COPY ./scr/app/requirements.txt /app/requirements.txt
+# Copiar código primero
+COPY . .
 
-# Instalar dependencias
-RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir -r /app/requirements.txt
+# Copiar requirements.lock (tiene todas las dependencias pinned)
+COPY requirements.lock .
 
-# Copiar todo el código de la app
-COPY ./scr/app /app
+# Crear venv e instalar dependencias en una sola capa
+RUN python -m venv venv && \
+    venv/bin/pip install --no-cache-dir --upgrade pip && \
+    venv/bin/pip install --no-cache-dir -r requirements.lock
 
-# Exponer el puerto donde correrá FastAPI (8000 recomendado)
+# Exponer el puerto donde correrá FastAPI
 EXPOSE 8000
 
-# Comando de inicio
-CMD ["uvicorn", "main_orq:app", "--host", "0.0.0.0", "--port", "8000"]
+# Comando de inicio - usar ruta absoluta a uvicorn
+CMD ["/app/venv/bin/uvicorn", "scr.app.main_orq:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,0 +1,140 @@
+\documentclass[12pt,a4paper]{article}
+
+% ======== PAQUETES ========
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern} % Tipografía moderna
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{url}
+
+% ======== CONFIGURACIÓN DE PÁGINA ========
+\geometry{margin=1in}
+\setstretch{1.2}
+
+% ======== ENCABEZADO Y PIE ========
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\small Laboratorio y Consultoría de Datos II \\ Agosto–Diciembre 2025}
+\fancyfoot[C]{\thepage}
+
+% ======== ESTILO DE TÍTULOS ========
+\titleformat{\section}{\large\bfseries\MakeUppercase}{\thesection.}{0.8em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.6em}{}
+
+% ======== HIPERVÍNCULOS ========
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=teal,
+    citecolor=blue
+}
+
+% ======== TÍTULO ========
+\title{\textbf{\LARGE Detección de Clientes: Suscripción de Depósito Bancario}}
+\author{
+    \normalsize Facundo Casas\\[-0.2em]
+    \href{mailto:facundocasas@uca.edu.ar}{facundocasas@uca.edu.ar}\\[0.5em]
+    \normalsize Universidad Católica Argentina
+    \and
+    \normalsize Javier Balda\\[-0.2em]
+    \href{mailto:javierbalda@uca.edu.ar}{javierbalda@uca.edu.ar}\\[0.5em]
+    \normalsize Universidad Católica Argentina
+    \and
+    \normalsize Juan Caracoix\\[-0.2em]
+    \href{mailto:juancaracoix@uca.edu.ar}{juancaracoix@uca.edu.ar}\\[0.5em]
+    \normalsize Universidad Católica Argentina
+}
+\date{}
+
+% ======== DOCUMENTO ========
+\begin{document}
+
+\maketitle
+
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{1em}
+
+% ======== RESUMEN ========
+\section*{Abstract}
+La explicabilidad es un aspecto fundamental del aprendizaje automático, necesario para garantizar transparencia, interpretabilidad y confianza en los procesos de toma de decisiones. [...]
+
+% ======== PALABRAS CLAVE ========
+\vspace{1em}
+\noindent\textbf{Palabras clave:} Inteligencia Artificial, Modelos de Caja Negra, Similitud del Coseno, Aprendizaje Profundo, Explicabilidad, Redes Neuronales, Lógica, Regularización, Extracción de Reglas
+
+\vspace{1.5em}
+\noindent\rule{\textwidth}{0.4pt}
+
+% ======== INTRODUCCIÓN ========
+\section{Introducción}
+Las redes neuronales profundas (DNN) han demostrado tener alta precisión predictiva y un rendimiento superior en diversos problemas de aprendizaje automático. [...]
+
+% ======== EXPLICABILIDAD ========
+\section{Explicabilidad}
+La explicabilidad proporciona las bases para interpretar cómo los modelos generan salidas y comprender el razonamiento detrás de sus predicciones. [...]
+
+% ======== MARCO COLOSSUS ========
+\section{COLOSSUS}
+
+\subsection{Análisis de Contexto}
+El estudio examina cómo la similitud del coseno puede utilizarse para analizar los pesos y sesgos neuronales. [...]
+
+\subsection{Alcance}
+El marco COLOSSUS se centra en redes neuronales feedforward con capas completamente conectadas. [...]
+
+\subsection{Método Propuesto}
+El método propuesto integra similitud del coseno y lógica de primer orden (FOL) para generar reglas interpretables. [...]
+
+% ======== LIMITACIONES Y TRABAJO FUTURO ========
+\section{Limitaciones y Trabajo Futuro}
+Aunque el enfoque ofrece interpretabilidad, depende de arquitecturas simplificadas. Investigaciones futuras explorarán su extensión a redes recurrentes o convolucionales. [...]
+
+% ======== TRABAJOS RELACIONADOS ========
+\section{Trabajos Relacionados}
+Diversos estudios previos han investigado la extracción de reglas en redes neuronales, incluyendo árboles de decisión sustitutos y métodos de regresión simbólica. [...]
+
+% ======== CONTRIBUCIONES PRINCIPALES ========
+\section{Contribuciones Principales}
+Este estudio aporta: (1) un algoritmo híbrido simbólico–numérico para extracción de reglas, y (2) una métrica de interpretabilidad basada en similitud del coseno y entropía. [...]
+
+% ======== CONCLUSIÓN ========
+\section{Conclusión}
+La combinación de similitud del coseno y razonamiento lógico mejora la explicabilidad de redes neuronales profundas entrenadas, ofreciendo un balance entre interpretabilidad y poder predictivo. [...]
+
+% ======== CONFLICTOS DE INTERÉS ========
+\section*{Conflictos de Interés}
+Los autores declaran no tener conflictos de interés.
+
+% ======== FINANCIAMIENTO ========
+\section*{Financiamiento}
+Esta investigación no recibió financiamiento externo.
+
+% ======== FECHAS DEL PROCESO ========
+\section*{Fechas del Proceso}
+Recibido: Agosto 2025; Aceptado: Agosto 2025; Publicado: Diciembre 2025.
+
+% ======== AUTOR CORRESPONDIENTE ========
+\section*{Autor Correspondiente}
+Pablo Ariel Negro (\href{mailto:pablo.negro@example.com}{pablo.negro@example.com})
+
+% ======== REFERENCIAS ========
+\begin{thebibliography}{99}
+\bibitem{rumelhart1986} Rumelhart, D.E., Hinton, G.E., Williams, R.J. (1986). Learning representations by back-propagating errors. \textit{Nature}, 323(6088), 533–536.
+\bibitem{goodfellow2016} Goodfellow, I., Bengio, Y., Courville, A. (2016). \textit{Deep Learning}. MIT Press.
+\end{thebibliography}
+
+\vspace{1em}
+\noindent DOI: 10.4018/IJAIML.347988
+
+\vspace{1em}
+\footnotesize
+Este artículo se publica bajo la licencia de acceso abierto CC-BY 4.0.
+
+\end{document}

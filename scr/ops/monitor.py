@@ -4,6 +4,7 @@ import json
 from statistics import mean
 from pathlib import Path
 import pandas as pd
+import time
 
 LOG_PATH = Path("/tmp/app.log")
 ALERTS = Path("scr/ops/alerts.log")
@@ -84,5 +85,8 @@ def run_checks():
         emit_alert("WARN", "model_drift_percent", drift, ">=10%")
 
 if __name__ == "__main__":
-    run_checks()
-    print("Checks executed. Alerts written to scr/ops/alerts.log (if any).")
+    print("Starting monitor service...")
+    while True:
+        run_checks()
+        print("Checks executed. Alerts written to scr/ops/alerts.log (if any).")
+        time.sleep(60)  # espera 60 segundos antes de volver a ejecutar

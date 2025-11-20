@@ -6,3 +6,8 @@ pythonpath = [
 testpaths = [
     "scr/tests",
 ]
+markers = [
+    "integration: mark test as integration test (requires external services)",
+    "unit: mark test as unit test",
+    "slow: mark test as slow running"
+]
