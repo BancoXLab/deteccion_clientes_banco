@@ -11,6 +11,7 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usetikzlibrary{positioning}
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{url}
@@ -98,8 +99,8 @@ El método propuesto integra similitud del coseno y lógica de primer orden (FOL
 En esta sección se documentan los componentes de software desarrollados para entrenar, servir y procesar los datos del modelo, basados en la implementación disponible en la carpeta \texttt{scr/} del repositorio.
 
 \subsection{Modelo y artefactos}
-El modelo entrenado se empaqueta como un pipeline serializado en \texttt{scr/app/model/trained_pipeline-0.1.0.pkl} y su versión explícita en el código es \texttt{0.1.0}. La interfaz de inferencia expone dos funciones principales en \texttt{scr.app.model.model}:
-\begin{itemize}[leftmargin=*]
+El modelo entrenado se empaqueta como un pipeline serializado en \texttt{scr/app/model/trained\_pipeline-0.1.0.pkl} y su versión explícita en el código es \texttt{0.1.0}. La interfaz de inferencia expone dos funciones principales en \texttt{scr.app.model.model}:
+\begin{itemize}
     \item \texttt{predict\_pipeline(input\_data)}: devuelve la clase predicha (0/1).
     \item \texttt{predict\_pipeline\_proba(input\_data)}: devuelve la clase y las probabilidades por clase.
 \end{itemize}
@@ -109,12 +110,12 @@ La lista de variables esperadas por el pipeline (\texttt{FEATURE\_COLUMNS}) incl
 \subsection{API y Endpoints}
 La aplicación web se implementa con FastAPI en \texttt{scr/app/main.py} y en \texttt{scr/app/routes}. Los endpoints relevantes documentados en el código son:
 \begin{itemize}[leftmargin=*]
-    \item \texttt{GET /} : información básica y versión del modelo.
-    \item \texttt{GET /ping} : comprobación simple (pong).
-    \item \texttt{GET /healthz} : health check.
-    \item \texttt{GET /readyz} : readiness (verifica si el modelo está disponible).
-    \item \texttt{GET /info} : información del servicio y entorno.
-    \item \texttt{POST /predict} y \texttt{POST /predict/single} : endpoints de inferencia que aceptan el esquema \texttt{ClientData} (Pydantic) y devuelven la predicción y probabilidades.
+    \item \texttt{GET /}: información básica y versión del modelo.
+    \item \texttt{GET /ping}: comprobación simple (pong).
+    \item \texttt{GET /healthz}: health check.
+    \item \texttt{GET /readyz}: readiness (verifica si el modelo está disponible).
+    \item \texttt{GET /info}: información del servicio y entorno.
+    \item \texttt{POST /predict} y \texttt{POST /predict/single}: endpoints de inferencia que aceptan el esquema \texttt{ClientData} (Pydantic) y devuelven la predicción y probabilidades.
 \end{itemize}
 
 El código incluye manejo de errores centralizado mediante el decorador \texttt{handle\_exceptions} definido en \texttt{scr/utils/errors.py}, que traduce excepciones internas a respuestas HTTP apropiadas.
@@ -151,13 +152,13 @@ En la Figura \ref{fig:arquitectura} se muestra el diagrama arquitectónico que r
 \centering
 \begin{tikzpicture}[node distance=10mm, every node/.style={draw, rounded corners, align=center, font=\small}]
     % Nodes
-    \node (client) {Cliente /\nAplicación Frontend};
-    \node[right=of client] (api) {API REST\n(FastAPI, Uvicorn)};
-    \node[right=of api] (model) {Modelo\n(\texttt{trained\_pipeline-0.1.0.pkl})};
-    \node[below=of api] (prefect) {Orquestador\n(Prefect) - tareas de entrenamiento e inferencia};
-    \node[below=of model] (tmp) {Almacenamiento Temporal\n(/tmp/bancox\_train \; parquet)};
-    \node[right=of model] (db) {Base de Datos\n(MySQL) - tablas raw / prepared};
-    \node[below=of tmp] (logs) {Logging\n(archivo rotativo, \texttt{LOG\_FILE})};
+    \node (client) {Cliente /Aplicación Frontend};
+    \node[right=of client] (api) {API REST (FastAPI, Uvicorn)};
+    \node[right=of api] (model) {Modelo (\texttt{trained\_pipeline-0.1.0.pkl})};
+    \node[below=of api] (prefect) {Orquestador (Prefect) - tareas de entrenamiento e inferencia};
+    \node[below=of model] (tmp) {Almacenamiento Temporal (/tmp/bancox\_train \; parquet)};
+    \node[right=of model] (db) {Base de Datos (MySQL) - tablas raw / prepared};
+    \node[below=of tmp] (logs) {Logging (archivo rotativo, \texttt{LOG\_FILE})};
 
     % Edges
     \draw[->, thick] (client) -- node[above]{HTTP requests} (api);
