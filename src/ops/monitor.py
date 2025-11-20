@@ -10,7 +10,7 @@ import json
 import time
 import logging
 from pathlib import Path
-from typi compng import List, Dict
+from typing import List, Dict
 
 import pandas as pd
 

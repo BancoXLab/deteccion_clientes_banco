@@ -1,9 +1,5 @@
 version: '3.8'
-
 services:
-  # ═══════════════════════════════════════════════════════════
-  # DATABASE SERVICES
-  # ═══════════════════════════════════════════════════════════
   mysql:
     image: mysql:8.0
     container_name: bancox_mysql
@@ -13,204 +9,244 @@ services:
       MYSQL_USER: ${MYSQL_USER:-bancox_user}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-bancox_password}
     ports:
-      - "3306:3306"
+    - 3306:3306
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./data:/app/data:ro
+    - mysql_data:/var/lib/mysql
+    - ./data:/app/data:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test:
+      - CMD
+      - mysqladmin
+      - ping
+      - -h
+      - localhost
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
     networks:
-      - bancox_network
-
-  # ═══════════════════════════════════════════════════════════
-  # API & INFERENCE SERVICES
-  # ═══════════════════════════════════════════════════════════
+    - bancox_network
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: bancox_mlflow
+    ports:
+    - 5000:5000
+    volumes:
+    - mlflow_data:/mlflow
+    environment:
+    - MLFLOW_BACKEND_STORE_URI=sqlite:////mlflow/mlflow.db
+    - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
+    command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root
+      /mlflow/artifacts --host 0.0.0.0 --port 5000
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:5000/
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+    - bancox_network
   fastapi:
     image: bancox:latest
     build: .
     container_name: bancox_api
     ports:
-      - "8000:8000"
+    - 8000:8000
     volumes:
-      - ./src:/app/src
-      - ./config:/app/config
-      - ./data:/app/data
-      - ./model:/app/model
+    - ./src:/app/src
+    - ./config:/app/config
+    - ./data:/app/data
+    - ./model:/app/model
     environment:
-      - ENV=dev
-      - PYTHONPATH=/app
+    - ENV=dev
+    - PYTHONPATH=/app
+    - MLFLOW_TRACKING_URI=http://mlflow:5000
     healthcheck:
-      test: ["CMD", "/app/venv/bin/python", "-c", "import requests; requests.get('http://localhost:8000/healthz', timeout=2)"]
+      test:
+      - CMD
+      - /app/venv/bin/python
+      - -c
+      - import requests; requests.get('http://localhost:8000/healthz', timeout=2)
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 20s
     networks:
-      - bancox_network
+    - bancox_network
     depends_on:
       mysql:
         condition: service_healthy
-
+      mlflow:
+        condition: service_healthy
   client:
     build: .
     container_name: bancox_client
     working_dir: /app
     volumes:
-      - ./src:/app/src
-      - ./config:/app/config
-      - ./data:/app/data
-    command: ["/app/venv/bin/python", "/app/src/client/client.py"]
+    - ./src:/app/src
+    - ./config:/app/config
+    - ./data:/app/data
+    command:
+    - /app/venv/bin/python
+    - /app/src/client/client.py
     depends_on:
       fastapi:
         condition: service_healthy
     environment:
-      - PYTHONPATH=/app
-      - BANCO_X_API_URL=http://bancox_api:8000
+    - PYTHONPATH=/app
+    - BANCO_X_API_URL=http://bancox_api:8000
     networks:
-      - bancox_network
-
-  # ═══════════════════════════════════════════════════════════
-  # ETL & TRAINING SERVICES
-  # ═══════════════════════════════════════════════════════════
+    - bancox_network
   data-ingestion:
     build: .
     container_name: bancox_data_ingestion
     working_dir: /app
     volumes:
-      - ./src:/app/src
-      - ./config:/app/config
-      - ./data:/app/data
-      - /tmp/bancox_train:/tmp/bancox_train
-    command: ["/app/venv/bin/python", "/app/src/ingesta/Ingesta_de_datos.py"]
+    - ./src:/app/src
+    - ./config:/app/config
+    - ./data:/app/data
+    - /tmp/bancox_train:/tmp/bancox_train
+    command:
+    - /app/venv/bin/python
+    - /app/src/ingesta/Ingesta_de_datos.py
     environment:
-      - PYTHONPATH=/app
-      - user=${MYSQL_USER:-bancox_user}
-      - password=${MYSQL_PASSWORD:-bancox_password}
-      - host=mysql
-      - port=3306
-      - db=${MYSQL_DATABASE:-bancox_db}
-      - BANCX_TMP_DIR=/tmp/bancox_train
+    - PYTHONPATH=/app
+    - user=${MYSQL_USER:-bancox_user}
+    - password=${MYSQL_PASSWORD:-bancox_password}
+    - host=mysql
+    - port=3306
+    - db=${MYSQL_DATABASE:-bancox_db}
+    - BANCX_TMP_DIR=/tmp/bancox_train
     depends_on:
       mysql:
         condition: service_healthy
     networks:
-      - bancox_network
+    - bancox_network
     profiles:
-      - training
-
+    - training
   training-pipeline:
     build: .
     container_name: bancox_training
     working_dir: /app
     volumes:
-      - ./src:/app/src
-      - ./config:/app/config
-      - ./data:/app/data
-      - ./model:/app/model
-      - /tmp/bancox_train:/tmp/bancox_train
-    command: ["/app/venv/bin/python", "-m", "src.training.train_pipeline"]
+    - ./src:/app/src
+    - ./config:/app/config
+    - ./data:/app/data
+    - ./model:/app/model
+    - /tmp/bancox_train:/tmp/bancox_train
+    - ./artifacts:/app/artifacts
+    command:
+    - /app/venv/bin/python
+    - -m
+    - src.training.train_pipeline
     environment:
-      - PYTHONPATH=/app
-      - user=${MYSQL_USER:-bancox_user}
-      - password=${MYSQL_PASSWORD:-bancox_password}
-      - host=mysql
-      - port=3306
-      - db=${MYSQL_DATABASE:-bancox_db}
-      - BANCX_TMP_DIR=/tmp/bancox_train
+    - PYTHONPATH=/app
+    - user=${MYSQL_USER:-bancox_user}
+    - password=${MYSQL_PASSWORD:-bancox_password}
+    - host=mysql
+    - port=3306
+    - db=${MYSQL_DATABASE:-bancox_db}
+    - BANCX_TMP_DIR=/tmp/bancox_train
+    - MLFLOW_TRACKING_URI=http://mlflow:5000
+    - BANCX_MODEL_DIR=/app/model
+    - BANCX_RESULTS_DIR=/app/artifacts/resultados
     depends_on:
       mysql:
         condition: service_healthy
       data-ingestion:
         condition: service_completed_successfully
+      mlflow:
+        condition: service_healthy
     networks:
-      - bancox_network
+    - bancox_network
     profiles:
-      - training
-
-  # ═══════════════════════════════════════════════════════════
-  # MONITORING & ALERTING SERVICES
-  # ═══════════════════════════════════════════════════════════
+    - training
   monitor:
     build: .
     container_name: bancox_monitor
-    command: ["/app/venv/bin/python", "/app/src/ops/monitor.py"]
+    command:
+    - /app/venv/bin/python
+    - /app/src/ops/monitor.py
     volumes:
-      - ./src:/app/src
-      - ./config:/app/config
-      - ./data:/app/data
+    - ./src:/app/src
+    - ./config:/app/config
+    - ./data:/app/data
     depends_on:
       fastapi:
         condition: service_healthy
     environment:
-      - CONFIG_PATH=/app/config/monitoring.json
-      - PYTHONPATH=/app
+    - CONFIG_PATH=/app/config/monitoring.json
+    - PYTHONPATH=/app
     networks:
-      - bancox_network
-
+    - bancox_network
   alert-server:
     build: .
     container_name: bancox_alerts
     ports:
-      - "9000:9000"
-    command: ["/app/venv/bin/python", "/app/src/ops/alert_server.py"]
+    - 9000:9000
+    command:
+    - /app/venv/bin/python
+    - /app/src/ops/alert_server.py
     volumes:
-      - ./src:/app/src
-      - ./config:/app/config
-      - ./data:/app/data
+    - ./src:/app/src
+    - ./config:/app/config
+    - ./data:/app/data
     depends_on:
-      - monitor
+    - monitor
     networks:
-      - bancox_network
-
-  # ═══════════════════════════════════════════════════════════
-  # WEB UI SERVICES
-  # ═══════════════════════════════════════════════════════════
+    - bancox_network
   streamlit-app:
     build: .
     container_name: bancox_streamlit
     ports:
-      - "8501:8501"
-    command: ["/app/venv/bin/streamlit", "run", "/app/src/app/artifacts/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    - 8501:8501
+    command:
+    - /app/venv/bin/streamlit
+    - run
+    - /app/src/app/artifacts/streamlit_app.py
+    - --server.port=8501
+    - --server.address=0.0.0.0
     volumes:
-      - ./src:/app/src
-      - ./config:/app/config
-      - ./data:/app/data
+    - ./src:/app/src
+    - ./config:/app/config
+    - ./data:/app/data
     environment:
-      - PYTHONPATH=/app
+    - PYTHONPATH=/app
     depends_on:
       fastapi:
         condition: service_healthy
     networks:
-      - bancox_network
-
+    - bancox_network
   dashboard:
     build: .
     container_name: bancox_dashboard
     ports:
-      - "8500:8500"
-    command: ["/app/venv/bin/streamlit", "run", "/app/src/app/artifacts/monitor_dashboard.py", "--server.port=8500", "--server.address=0.0.0.0"]
+    - 8500:8500
+    command:
+    - /app/venv/bin/streamlit
+    - run
+    - /app/src/app/artifacts/monitor_dashboard.py
+    - --server.port=8500
+    - --server.address=0.0.0.0
     volumes:
-      - ./src:/app/src
-      - ./config:/app/config
-      - ./data:/app/data
+    - ./src:/app/src
+    - ./config:/app/config
+    - ./data:/app/data
     environment:
-      - PYTHONPATH=/app
+    - PYTHONPATH=/app
     depends_on:
-      - alert-server
+    - alert-server
     networks:
-      - bancox_network
-
-# ═════════════════════════════════════════════════════════════
-# NETWORKS & VOLUMES
-# ═════════════════════════════════════════════════════════════
+    - bancox_network
 networks:
   bancox_network:
     driver: bridge
-
 volumes:
   mysql_data:
+    driver: local
+  mlflow_data:
     driver: local
