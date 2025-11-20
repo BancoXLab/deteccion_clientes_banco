@@ -26,8 +26,8 @@ jobs:
           pip install -U pip
           pip install -r requirements.txt
 
-      - name: Run tests
-        run: pytest -q
+      - name: Run unit tests
+        run: pytest tests/ -v --tb=short -k "not integration"
 
   build-image:
     needs: tests
@@ -38,17 +38,68 @@ jobs:
       - name: Build Docker image
         run: docker build -t bancox:ci .
 
-      - name: Run Docker container (health check)
+      - name: Run Docker Compose stack for integration tests
         run: |
-          docker run -d -p 8000:8000 --name bancox_test bancox:ci
-          echo "Esperando 15 segundos para que la app se inicie..."
-          sleep 15
+          # Start services with Docker Compose
+          docker compose up -d --build
+          echo "Waiting 30 seconds for services to be ready..."
+          sleep 30
+          
+      - name: Check API health
+        run: |
           echo "Verificando endpoint /healthz"
-          curl -v http://localhost:8000/healthz || (echo "Health check falló"; docker logs bancox_test; exit 1)
+          curl -v http://localhost:8000/healthz || (echo "Health check falló"; docker compose logs; exit 1)
           echo ""
           echo "Health check OK ✅"
-        shell: bash
 
-      - name: Stop Docker container
+      - name: Check API info endpoint
+        run: |
+          echo "Verificando endpoint /info"
+          curl -v http://localhost:8000/info || (echo "Info endpoint falló"; docker compose logs; exit 1)
+          echo ""
+          echo "Info endpoint OK ✅"
+
+      - name: Test API prediction endpoint
+        run: |
+          echo "Probando endpoint /predict con datos válidos"
+          curl -X POST "http://localhost:8000/predict" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "age": 35, "month": 5, "day_of_week": 1, "duration": 500,
+              "campaign": 1, "pdays": -1, "previous": 0, "emp_var_rate": 1.1,
+              "cons_price_idx": 93.5, "cons_conf_idx": -36.0, "euribor3m": 0.7,
+              "nr_employed": 5100.0, "previous_bin": 0, "job_target_mean": 0.45,
+              "marital_divorced": 0, "marital_married": 1, "marital_single": 0,
+              "marital_unknown": 0, "education_freq_encode": 0.5, "housing_no": 0,
+              "housing_unknown": 0, "housing_yes": 1, "loan_no": 0,
+              "loan_unknown": 0, "loan_yes": 1, "contact_cellular": 1, "contact_telephone": 0
+            }' || (echo "Prediction endpoint falló"; docker compose logs; exit 1)
+          echo ""
+          echo "Prediction endpoint OK ✅"
+
+      - name: Check Alert Server health
+        run: |
+          echo "Verificando Alert Server en puerto 9000"
+          curl -v http://localhost:9000/ || (echo "Alert server health check falló"; docker compose logs; exit 1)
+          echo ""
+          echo "Alert Server OK ✅"
+
+      - name: Check Streamlit App health
+        run: |
+          echo "Verificando Streamlit App en puerto 8501"
+          curl -v http://localhost:8501/ || echo "Streamlit app check completado"
+
+      - name: Check Monitor Dashboard health
+        run: |
+          echo "Verificando Monitor Dashboard en puerto 8500"
+          curl -v http://localhost:8500/ || echo "Monitor dashboard check completado"
+
+      - name: Show Docker Compose logs
+        if: failure()
+        run: |
+          echo "=== Docker Compose Logs ===="
+          docker compose logs
+
+      - name: Cleanup
         if: always()
-        run: docker stop bancox_test
+        run: docker compose down -v

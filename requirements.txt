@@ -162,6 +162,7 @@ prompt_toolkit==3.0.51
 protobuf==6.32.1
 psutil>=5.9.5
 ptyprocess==0.7.0
+Flask-HTTPAuth==4.8.0
 pure_eval==0.2.3
 py-key-value-aio==0.3.0
 py-key-value-shared==0.3.0

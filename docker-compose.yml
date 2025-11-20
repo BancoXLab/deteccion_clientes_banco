@@ -1,6 +1,34 @@
 version: '3.8'
 
 services:
+  # ═══════════════════════════════════════════════════════════
+  # DATABASE SERVICES
+  # ═══════════════════════════════════════════════════════════
+  mysql:
+    image: mysql:8.0
+    container_name: bancox_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-bancox_db}
+      MYSQL_USER: ${MYSQL_USER:-bancox_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-bancox_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./data:/app/data:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - bancox_network
+
+  # ═══════════════════════════════════════════════════════════
+  # API & INFERENCE SERVICES
+  # ═══════════════════════════════════════════════════════════
   fastapi:
     image: bancox:latest
     build: .
@@ -8,9 +36,10 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./scr:/app/scr
+      - ./src:/app/src
       - ./config:/app/config
       - ./data:/app/data
+      - ./model:/app/model
     environment:
       - ENV=dev
       - PYTHONPATH=/app
@@ -20,29 +49,97 @@ services:
       timeout: 5s
       retries: 3
       start_period: 20s
+    networks:
+      - bancox_network
+    depends_on:
+      mysql:
+        condition: service_healthy
 
   client:
     build: .
     container_name: bancox_client
     working_dir: /app
     volumes:
-      - ./scr:/app/scr
+      - ./src:/app/src
       - ./config:/app/config
       - ./data:/app/data
-    command: ["/app/venv/bin/python", "/app/scr/client/client.py"]
+    command: ["/app/venv/bin/python", "/app/src/client/client.py"]
     depends_on:
       fastapi:
         condition: service_healthy
     environment:
       - PYTHONPATH=/app
       - BANCO_X_API_URL=http://bancox_api:8000
+    networks:
+      - bancox_network
 
+  # ═══════════════════════════════════════════════════════════
+  # ETL & TRAINING SERVICES
+  # ═══════════════════════════════════════════════════════════
+  data-ingestion:
+    build: .
+    container_name: bancox_data_ingestion
+    working_dir: /app
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./data:/app/data
+      - /tmp/bancox_train:/tmp/bancox_train
+    command: ["/app/venv/bin/python", "/app/src/ingesta/Ingesta_de_datos.py"]
+    environment:
+      - PYTHONPATH=/app
+      - user=${MYSQL_USER:-bancox_user}
+      - password=${MYSQL_PASSWORD:-bancox_password}
+      - host=mysql
+      - port=3306
+      - db=${MYSQL_DATABASE:-bancox_db}
+      - BANCX_TMP_DIR=/tmp/bancox_train
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - bancox_network
+    profiles:
+      - training
+
+  training-pipeline:
+    build: .
+    container_name: bancox_training
+    working_dir: /app
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./model:/app/model
+      - /tmp/bancox_train:/tmp/bancox_train
+    command: ["/app/venv/bin/python", "-m", "src.training.train_pipeline"]
+    environment:
+      - PYTHONPATH=/app
+      - user=${MYSQL_USER:-bancox_user}
+      - password=${MYSQL_PASSWORD:-bancox_password}
+      - host=mysql
+      - port=3306
+      - db=${MYSQL_DATABASE:-bancox_db}
+      - BANCX_TMP_DIR=/tmp/bancox_train
+    depends_on:
+      mysql:
+        condition: service_healthy
+      data-ingestion:
+        condition: service_completed_successfully
+    networks:
+      - bancox_network
+    profiles:
+      - training
+
+  # ═══════════════════════════════════════════════════════════
+  # MONITORING & ALERTING SERVICES
+  # ═══════════════════════════════════════════════════════════
   monitor:
     build: .
     container_name: bancox_monitor
-    command: ["/app/venv/bin/python", "/app/scr/ops/monitor.py"]
+    command: ["/app/venv/bin/python", "/app/src/ops/monitor.py"]
     volumes:
-      - ./scr:/app/scr
+      - ./src:/app/src
       - ./config:/app/config
       - ./data:/app/data
     depends_on:
@@ -51,29 +148,69 @@ services:
     environment:
       - CONFIG_PATH=/app/config/monitoring.json
       - PYTHONPATH=/app
+    networks:
+      - bancox_network
 
   alert-server:
     build: .
     container_name: bancox_alerts
     ports:
       - "9000:9000"
-    command: ["/app/venv/bin/python", "/app/scr/ops/alert_server.py"]
+    command: ["/app/venv/bin/python", "/app/src/ops/alert_server.py"]
     volumes:
-      - ./scr:/app/scr
+      - ./src:/app/src
       - ./config:/app/config
       - ./data:/app/data
     depends_on:
       - monitor
+    networks:
+      - bancox_network
+
+  # ═══════════════════════════════════════════════════════════
+  # WEB UI SERVICES
+  # ═══════════════════════════════════════════════════════════
+  streamlit-app:
+    build: .
+    container_name: bancox_streamlit
+    ports:
+      - "8501:8501"
+    command: ["/app/venv/bin/streamlit", "run", "/app/src/app/artifacts/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./data:/app/data
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      fastapi:
+        condition: service_healthy
+    networks:
+      - bancox_network
 
   dashboard:
     build: .
     container_name: bancox_dashboard
     ports:
       - "8500:8500"
-    command: ["/app/venv/bin/streamlit", "run", "/app/scr/app/artifacts/monitor_dashboard.py", "--server.port=8500", "--server.address=0.0.0.0"]
+    command: ["/app/venv/bin/streamlit", "run", "/app/src/app/artifacts/monitor_dashboard.py", "--server.port=8500", "--server.address=0.0.0.0"]
     volumes:
-      - ./scr:/app/scr
+      - ./src:/app/src
       - ./config:/app/config
       - ./data:/app/data
+    environment:
+      - PYTHONPATH=/app
     depends_on:
       - alert-server
+    networks:
+      - bancox_network
+
+# ═════════════════════════════════════════════════════════════
+# NETWORKS & VOLUMES
+# ═════════════════════════════════════════════════════════════
+networks:
+  bancox_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
