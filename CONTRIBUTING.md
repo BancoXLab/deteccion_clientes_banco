@@ -4,7 +4,7 @@
 
 ```
 banco-x-detector/
-├── scr/                    # Código principal del proyecto
+├── src/                    # Código principal del proyecto (estándar Python)                    # Código principal del proyecto
 │   ├── app/               # API FastAPI y rutas
 │   ├── ingesta/           # Módulo de ingesta de datos
 │   ├── training/          # Pipeline de entrenamiento
@@ -83,7 +83,7 @@ pytest tests/test_training.py::test_smote -v
 
 ### Ejecutar con cobertura
 ```bash
-pytest --cov=scr --cov-report=html
+pytest --cov=src --cov-report=html
 ```
 
 ### Ejecutar solo tests unitarios
@@ -100,14 +100,14 @@ pytest -m integration -v
 
 ### Formateo automático
 ```bash
-black scr/ tests/
-isort scr/ tests/
-flake8 scr/ tests/
+black src/ tests/
+isort src/ tests/
+flake8 src/ tests/
 ```
 
 ### Type checking (opcional)
 ```bash
-mypy scr/
+mypy src/
 ```
 
 ## Flujo de Trabajo Git

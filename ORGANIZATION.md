@@ -150,7 +150,7 @@ if __name__ == "__main__":
 ```
 deteccion_clientes_banco/
 │
-├── scr/                           # Código principal
+├── src/                           # Código principal                           # Código principal
 │   ├── __init__.py
 │   ├── app/                       # API FastAPI
 │   ├── ingesta/                   # Ingesta de datos
