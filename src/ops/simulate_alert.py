@@ -4,6 +4,11 @@ import csv
 from pathlib import Path
 import random
 import subprocess
+import logging
+from src.ops.logging_config import configure_logging
+
+configure_logging()
+logger = logging.getLogger(__name__)
 
 LOG_PATH = Path("/tmp/app.log")
 SAMPLE = Path("data/samples/sample_data.csv")
@@ -12,6 +17,7 @@ BASELINE = Path("scr/ops/drift_baseline.json")
 def append_log(line):
     with open(LOG_PATH, "a") as f:
         f.write(line + "\n")
+    logger.info("Appended log: %s", line)
 
 def generate_error_logs(n=20):
     # mezcla de status 200 y 500 con latencias
