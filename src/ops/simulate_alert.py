@@ -6,7 +6,7 @@ import random
 import subprocess
 
 LOG_PATH = Path("/tmp/app.log")
-SAMPLE = Path("data/sample.csv")
+SAMPLE = Path("data/samples/sample_data.csv")
 BASELINE = Path("scr/ops/drift_baseline.json")
 
 def append_log(line):

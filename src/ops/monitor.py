@@ -9,7 +9,7 @@ import time
 LOG_PATH = Path("/tmp/app.log")
 ALERTS = Path("scr/ops/alerts.log")
 DRIFT_BASELINE = Path("scr/ops/drift_baseline.json")
-SAMPLE = Path("data/sample.csv")
+SAMPLE = Path("data/samples/sample_data.csv")
 
 def parse_logs():
     if not LOG_PATH.exists():

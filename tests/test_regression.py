@@ -6,7 +6,7 @@ from pathlib import Path
 from sklearn.metrics import f1_score
 
 # Config desde env o rutas por defecto
-MLFLOW_CSV = Path(os.getenv("MLFLOW_METRICS_CSV", "mlflow_metrics.csv"))
+MLFLOW_CSV = Path(os.getenv("MLFLOW_METRICS_CSV", "artifacts/resultados/mlflow_metrics.csv"))
 EVAL_DATA = Path(os.getenv("EVAL_DATA_PQ", "data/eval.parquet"))
 CANDIDATE_MODEL = Path(os.getenv("CANDIDATE_MODEL_PKL", "model/trained_pipeline-0.1.0.pkl"))
 

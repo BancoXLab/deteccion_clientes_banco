@@ -112,7 +112,7 @@ def export_mlflow_metrics_to_csv():
     """
     repo_root = Path.cwd()
     mlruns_dir = repo_root / "mlruns"
-    csv_path = repo_root / os.getenv("MLFLOW_METRICS_CSV", "mlflow_metrics.csv")
+    csv_path = repo_root / os.getenv("MLFLOW_METRICS_CSV", "artifacts/resultados/mlflow_metrics.csv")
     experiment_name = os.getenv("MLFLOW_EXPERIMENT", "baseline_experiment")
 
     # Preferir mlruns local si existe
