@@ -7,3 +7,30 @@
 *.jks
 secrets/
 config/*.secret
+
+# Build / packaging
+build/
+banco_x_detector.egg-info/
+
+# Python
+*.pyc
+__pycache__/
+
+# pytest cache
+.pytest_cache/
+
+# Environment
+.venv
+.venv*/
+
+# ML artifacts / data / models
+mlruns/
+mlflow.db
+models/*.pkl
+artifacts/resultados/
+
+# Jupyter
+*.ipynb_checkpoints
+
+# OS files
+.DS_Store
