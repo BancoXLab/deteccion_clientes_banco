@@ -27,7 +27,7 @@ Se implementó un sistema COMPLETO de validación de entrada en main_orq.py que:
 📁 ARCHIVOS ENTREGABLES
 ═══════════════════════════════════════════════════════════════════════════════
 
-  1️⃣  scr/app/main_orq.py ........................ ✏️  MODIFICADO
+  1️⃣  src/app/main_orq.py ........................ ✏️  MODIFICADO
       • Validación robusta de entrada
       • Clase ClientData mejorada
       • Endpoint /predict actualizado
@@ -190,8 +190,8 @@ Resultado: Muestra 8 casos de prueba con mensajes reales
 OPCIÓN B: API Real
 ──────────────────
 Terminal 1:
-$ cd /workspaces/deteteccion_clientes_banco
-$ uvicorn scr.app.main_orq:app --reload --port 8000
+  $ cd /workspaces/deteteccion_clientes_banco
+  $ uvicorn src.app.main_orq:app --reload --port 8000
 
 Terminal 2:
 $ curl -X POST "http://localhost:8000/predict" \

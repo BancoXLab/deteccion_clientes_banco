@@ -106,7 +106,7 @@ La aplicación incluye una interfaz web moderna construida con **Streamlit** que
 
 **Instalación de dependencias:**
 ```bash
-pip install -r streamlit_requirements.txt
+pip install -r requirements.txt
 ```
 
 **Ejecutar la interfaz:**

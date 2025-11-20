@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-setup.py
-banco_x_detector.egg-info/PKG-INFO
-banco_x_detector.egg-info/SOURCES.txt
-banco_x_detector.egg-info/dependency_links.txt
-banco_x_detector.egg-info/requires.txt
-banco_x_detector.egg-info/top_level.txt
-scr/__init__.py

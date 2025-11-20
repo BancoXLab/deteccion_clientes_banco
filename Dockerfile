@@ -10,16 +10,16 @@ WORKDIR /app
 # Copiar código primero
 COPY . .
 
-# Copiar requirements.lock (tiene todas las dependencias pinned)
-COPY requirements.lock .
+# Copiar requirements.txt (unificado con dependencias pinned)
+COPY requirements.txt .
 
 # Crear venv e instalar dependencias en una sola capa
 RUN python -m venv venv && \
     venv/bin/pip install --no-cache-dir --upgrade pip && \
-    venv/bin/pip install --no-cache-dir -r requirements.lock
+    venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Exponer el puerto donde correrá FastAPI
 EXPOSE 8000
 
 # Comando de inicio - usar ruta absoluta a uvicorn
-CMD ["/app/venv/bin/uvicorn", "scr.app.main_orq:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/venv/bin/uvicorn", "src.app.main_orq:app", "--host", "0.0.0.0", "--port", "8000"]

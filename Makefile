@@ -5,7 +5,7 @@ train:
 
 # Instalar dependencias de Streamlit
 streamlit-install:
-	pip install -r streamlit_requirements.txt
+	pip install -r requirements.txt
 
 # Ejecutar la interfaz de Streamlit
 streamlit:
@@ -13,7 +13,7 @@ streamlit:
 
 # Ejecutar la API
 api:
-	python -m uvicorn scr.app.main:app --host 0.0.0.0 --port 8000 --reload
+	python -m uvicorn src.app.main:app --host 0.0.0.0 --port 8000 --reload
 
 # Ejecutar API con Docker
 api-docker:
