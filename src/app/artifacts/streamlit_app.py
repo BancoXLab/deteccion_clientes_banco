@@ -2,14 +2,18 @@ import streamlit as st
 import requests
 import pandas as pd
 from typing import List
+import os
 
 st.set_page_config(page_title="Banco X - Predictor", page_icon="", layout="wide")
 
 st.title("Banco X - Predictor de Suscripción")
 
 # API URL configuration
+
+DEFAULT_API_URL = os.getenv("BANCO_X_API_URL", "http://fastapi:8000")
+
 if "api_url" not in st.session_state:
-    st.session_state.api_url = "http://localhost:8000"
+    st.session_state.api_url = DEFAULT_API_URL
 
 # Sidebar
 with st.sidebar:

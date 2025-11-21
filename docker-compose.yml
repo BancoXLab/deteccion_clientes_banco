@@ -30,26 +30,29 @@ services:
     image: ghcr.io/mlflow/mlflow:latest
     container_name: bancox_mlflow
     ports:
-    - 5000:5000
+      - "5000:5000"
     volumes:
-    - mlflow_data:/mlflow
+      - mlflow_data:/mlflow
     environment:
-    - MLFLOW_BACKEND_STORE_URI=sqlite:////mlflow/mlflow.db
-    - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
-    command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root
-      /mlflow/artifacts --host 0.0.0.0 --port 5000
+      - MLFLOW_BACKEND_STORE_URI=sqlite:////mlflow/mlflow.db
+      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+      --host 0.0.0.0
+      --port 5000
+
     healthcheck:
-      test:
-      - CMD
-      - curl
-      - -f
-      - http://localhost:5000/
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000')"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 40s
+
     networks:
-    - bancox_network
+      - bancox_network
+
   fastapi:
     image: bancox:latest
     build: .
