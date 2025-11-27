@@ -1,7 +1,7 @@
 import requests
 from typing import Any, Dict, Optional
 from dataclasses import dataclass
-import os
+
 
 @dataclass
 class PredictionResponse:
@@ -18,7 +18,7 @@ class APIClient:
     """Cliente HTTP para consumir la API de Banco X.
     
     Ejemplo de uso:
-        client = APIClient("http://localhost:8000")
+        client = APIClient("http://fastapi:8000")
         
         # Con un diccionario de datos
         result = client.predict({
@@ -34,15 +34,14 @@ class APIClient:
         print(result)
     """
     
-    def __init__(self, base_url: str = None):
-        env_url = os.getenv("BANCO_X_API_URL")
-
-    if base_url:
+    def __init__(self, base_url: str = "http://localhost:8000"):
+        """
+        Inicializa el cliente API.
+        
+        Args:
+            base_url: URL base de la API (default: http://localhost:8000)
+        """
         self.base = base_url.rstrip("/")
-    elif env_url:
-        self.base = env_url.rstrip("/")
-    else:
-        self.base = "http://fastapi:8000"
     
     def predict(self, payload: Dict[str, Any], timeout: int = 10) -> PredictionResponse:
         """
