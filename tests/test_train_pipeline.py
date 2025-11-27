@@ -34,7 +34,7 @@ def test_model_training():
     data_path = "/workspaces/deteccion_clientes_banco/data/df_resampled.csv"
     if not Path(data_path).exists():
         print(f"❌ Archivo de datos no encontrado: {data_path}")
-        return False
+        assert False, f"Archivo de datos no encontrado: {data_path}"
     
     df = pd.read_csv(data_path)
     print(f"✓ Datos cargados: {df.shape}")
@@ -66,10 +66,10 @@ def test_model_training():
             print(f"✓ F1: {metrics['f1']:.4f}")
         except Exception as e:
             print(f"❌ Error: {e}")
-            return False
+            assert False, f"Error entrenando {model_type}: {e}"
     
     print(f"\n✓ Todos los modelos entrenados correctamente")
-    return True
+    assert True
 
 
 def test_production_model_loading():
@@ -85,10 +85,10 @@ def test_production_model_loading():
         if f1_production == 0.0:
             print("  ⚠ No hay modelo en producción aún (será la primera ejecución)")
         
-        return True
+        assert True
     except Exception as e:
         print(f"❌ Error: {e}")
-        return False
+        assert False, f"Error cargando modelo de producción: {e}"
 
 
 def test_directories():
@@ -114,7 +114,7 @@ def test_directories():
         if not (exists and readable and writable):
             all_ok = False
     
-    return all_ok
+    assert all_ok, "Faltan directorios o permisos incorrectos"
 
 
 def test_mlflow_connection():
@@ -132,10 +132,10 @@ def test_mlflow_connection():
         mlflow.set_experiment("test-pipeline")
         print(f"✓ Experimento de prueba creado")
         
-        return True
+        assert True
     except Exception as e:
         print(f"❌ Error: {e}")
-        return False
+        assert False, f"Error en conexión MLflow: {e}"
 
 
 def test_metrics_file():
@@ -173,10 +173,10 @@ def test_metrics_file():
         df = pd.read_csv(metrics_file)
         print(f"✓ Archivo contiene {len(df)} registros")
         
-        return True
+        assert True
     except Exception as e:
         print(f"❌ Error: {e}")
-        return False
+        assert False, f"Error manejando archivo de métricas: {e}"
 
 
 def run_all_tests():
@@ -217,10 +217,10 @@ def run_all_tests():
     
     if passed == total:
         print("\n✅ ¡Pipeline listo para usar!")
-        return True
+        assert True
     else:
         print(f"\n⚠ {total - passed} test(s) fallido(s). Revisa los errores arriba.")
-        return False
+        assert False, f"{total - passed} test(s) fallido(s)"
 
 
 if __name__ == "__main__":

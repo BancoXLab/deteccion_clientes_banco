@@ -1,7 +1,11 @@
 import logging
 import os
 try:
-    from pythonjsonlogger import jsonlogger
+    # Newer versions expose `pythonjsonlogger.json` while older expose `pythonjsonlogger.jsonlogger`
+    try:
+        from pythonjsonlogger import json as jsonlogger
+    except Exception:
+        from pythonjsonlogger import jsonlogger
 except Exception:
     jsonlogger = None
 

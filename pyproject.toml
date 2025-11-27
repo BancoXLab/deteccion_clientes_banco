@@ -24,7 +24,7 @@ classifiers = [
 dependencies = [
     "fastapi>=0.104.0",
     "uvicorn>=0.24.0",
-    "prefect>=2.14.0",
+    "prefect>=3.4.24",
     "psutil>=5.9.0",
     "pydantic>=2.0.0",
     "pandas>=1.5.0",
@@ -64,6 +64,12 @@ markers = [
     "integration: mark test as integration test (requires external services)",
     "unit: mark test as unit test",
     "slow: mark test as slow running"
+]
+filterwarnings = [
+    "ignore::PendingDeprecationWarning",
+    "ignore::DeprecationWarning",
+    "ignore:.*UserWarning:UserWarning",
+    "ignore::pytest.PytestReturnNotNoneWarning"
 ]
 
 [tool.black]
