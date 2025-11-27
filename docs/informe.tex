@@ -1,5 +1,476 @@
 \documentclass[12pt,a4paper]{article}
 
+% Paquetes y configuración
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{enumitem}
+
+\geometry{margin=1in}
+\setstretch{1.12}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\small Informe t\'ecnico (formato art\'iculo)}
+\fancyfoot[C]{\thepage}
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.4em}{}
+
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+
+\title{Predicci\'on de Suscripci\'on a Dep\'ositos Bancarios: Un Estudio Emp\'irico}
+\author{Equipo de Investigaci\'on}
+\date{}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Se presenta un estudio emp\'irico que aborda la predicci\'on de la probabilidad de suscripci\'on de clientes a productos de dep\'osito bancario. Se describen las etapas de obtenci\'on y preparaci\'on de datos, la selecci\'on y optimizaci\'on de clasificadores basados en gradiente potenciado, las estrategias de balanceo de clases aplicadas, las m\'etricas empleadas para evaluaci\'on y las t\'ecnicas de explicabilidad utilizadas para interpretar el comportamiento del sistema.
+\end{abstract}
+
+\noindent\textbf{Palabras clave:} Clasificaci\'on; XGBoost; SMOTE; explicabilidad; AUC ROC
+
+\section{Introducci\'on}
+La predicci\'on de la respuesta de clientes a ofertas financieras constituye un caso de uso frecuente en ciencia de datos aplicada a banca. El presente estudio persigue evaluar un conjunto de decisiones metodol\'ogicas —preprocesado, balanceo, modelado y explicabilidad— y documentar un pipeline de referencia reproducible desde la perspectiva metodol\'ogica.
+
+\section{Materiales y m\'etodos}
+\subsection{Datos}
+El dataset considerado incluye variables demogr\'aficas, socioecon\'omicas y de interacci\'on con campa\~nas previas; la variable objetivo es binaria y representa la suscripci\'on al producto ofrecido.
+
+\subsection{Preprocesado}
+Se adoptaron las siguientes operaciones de preprocesado:
+\begin{itemize}[leftmargin=*]
+  \item tratamiento de valores faltantes por imputaci\'on con estrategias simples (media/moda) o por separado por grupo cuando fue necesario;
+  \item codificaci\'on de variables categ\'oricas mediante one-hot encoding o codificaci\'on ordinal, seg\'un la naturaleza de la variable y su cardinalidad;
+  \item normalizaci\'on o estandarizaci\'on de variables num\'ericas en los casos en que algoritmos y transformaciones lo requirieron.
+\end{itemize}
+
+\subsection{Balanceo de clases}
+Se aplic\'o SMOTE para mitigar el desbalance de clases durante entrenamiento. SMOTE se integr\'o dentro de la etapa de validaci\'on cruzada de forma que la generaci\'on sint\'etica se realizara exclusivamente en particiones de entrenamiento para evitar fugas de informaci\'on.
+
+\subsection{Modelado}
+Se entrenaron clasificadores basados en XGBoost (gradient boosting) y variantes en ensamblado. La selecci\'on de hiperpar\'ametros se condujo mediante b\'usqueda bayesiana dirigida a maximizar AUC en validaci\'on cruzada estratificada.
+
+\subsection{Evaluaci\'on}
+La evaluaci\'on tuvo dos niveles: m\'etricas globales (AUC ROC, AUC PR) y m\'etricas de operaci\'on (precision@k, recall, F1). Asimismo se evalu\'o la calibraci\'on de probabilidades y la robustez de resultados frente a variaciones de semilla y particionamiento.
+
+\subsection{Explicabilidad}
+Se emplearon m\'etodos de explicabilidad para obtener evidencia interpretable:
+\begin{itemize}[leftmargin=*]
+  \item importancia global de variables derivada del estimador;
+  \item explicaciones locales mediante SHAP para cuantificar la contribuci\'on de cada variable a predicciones individuales;
+%  \item entrenamiento de modelos sustitutos (\'arboles de decisi\'on compactos) en subconjuntos regionales para extraer reglas interpretablemente legibles.
+\end{itemize}
+
+\section{Resultados}
+Los experimentos se dise\~naron para ofrecer evidencia reproducible sobre la eficacia y robustez del pipeline implementado. A continuaci\'on se describen con mayor detalle el protocolo experimental, las m\'etricas informadas, los resultados de interpretabilidad y las pruebas de estabilidad realizadas.
+
+\subsection{Protocolo experimental y m\'etricas}
+Se emple\'o validaci\'on cruzada estratificada (k-fold) y muestreo out-of-time cuando fue posible para estimar desempe\'no fuera de muestra. El preprocesado, la selecci\'on de hiperpar\'ametros y el balanceo con SMOTE se aplicaron exclusivamente sobre las particiones de entrenamiento para evitar fugas. Las m\'etricas reportadas incluyeron AUC ROC, AUC PR, precision, recall (sensibilidad), F1 y Brier score para evaluar calibraci\'on. Adicionalmente se analizaron curvas ROC/PR y tablas de confusion en umbrales operativos relevantes.
+
+\subsection{Desempe\~no agregado}
+Los clasificadores basados en gradiente potenciado mostraron mayor capacidad de discriminaci\'on respecto a modelos l\'igeros de referencia en las particiones evaluadas; en t\'erminos agregados la mejora fue estable, con incrementos en AUC ROC moderados pero consistentes. La aplicaci\'on de SMOTE mejor\'o el recall de la clase minoritaria (casos positivos), traduci\'endose en mayor cobertura de clientes potenciales, mientras que la precision experiment\'o una reducci\'on controlada que entra dentro del trade-off operativo esperado al priorizar detecci\'on.
+
+\subsection{Calibraci\'on y probabilidades}
+Se comprob\'o la calibraci\'on de probabilidades predichas mediante Brier score y diagramas de calibraci\'on; cuando fue necesario se aplicaron calibradores (Platt scaling o isotonic regression) sobre los conjuntos de validaci\'on. Tras calibraci\'on, las probabilidades resultaron m\'as alineadas con tasas observadas, lo que es crucial para la selecci\'on de umbrales en campa\~nas y para estrategias basadas en probabilidad de respuesta.
+
+\subsection{Interpretabilidad y extracci\'on de reglas}
+El an\'alisis de importancia y las explicaciones locales (SHAP) identificaron un subconjunto compacto de features con influencia elevada y consistente a trav\'es de particiones. % Sobre regiones definidas por combinaciones de estas variables se entrenaron modelos sustitutos (\'arboles compactos) que permitieron extraer reglas humanamente interpretables. % Estas reglas presentaron buena cobertura en subconjuntos relevantes y una fidelidad aceptable respecto al modelo complejo, por lo que resultan \'utiles como criterios de priorizaci\'on o como filtros previos a acciones humanas.
+
+\subsection{Pruebas de robustez}
+Se realizaron experimentos de sensibilidad ante variaciones de semilla y particionamiento, as\'i como pruebas de subsampling para evaluar estabilidad. Las m\'etricas clave (AUC, recall en umbrales seleccionados) mostraron variaci\'ones moderadas, indicando estabilidad razonable del flujo de entrenamiento. No obstante, se detectaron casos en los que la combinaci\'on de features raras y oversampling generaba reglas menos estables, lo que motiva validaci\'on adicional en datos out-of-time.
+
+\subsection{Implicaciones operativas}
+Desde la perspectiva operativa, los resultados implican que el modelo puede usarse para priorizar listas de contacto con una mayor densidad de respuestas esperadas. La selecci\'on de umbrales debe calibrarse con consideraci\'on de coste por contacto y precision, y es recomendable definir reglas de negocio que combinen puntuaciones de modelo con criterios de riesgo o exclusi\'on.
+
+\section{Discusi\'on}
+Los resultados evidencian que los modelos de boosting son adecuados para capturar interacciones no lineales y relaciones complejas en datos tabulares heterog\'eneos. Sin embargo, la aplicaci\'on en entornos productivos debe integrar consideraciones m\'as amplias que abarcan medidas econ\'omicas, gobernanza de decisiones y aspectos regulatorios.
+
+\subsection{Trade-offs y decisiones de umbral}
+La mejora en recall asociada al uso de SMOTE y la optimizaci\'on dirigida a AUC o recall requiere seleccionar umbrales que equilibren costes operativos (p. ej. coste por contacto) y beneficios esperados (conversiones). Es recomendable usar medidas como precision y lift en cohortes relevantes para escoger umbrales y estimar ROI antes de desplegar a escala.
+
+\subsection{Validaci\'on en producci\'on y A/B testing}
+La puesta en marcha requiere experimentaci\'on controlada (A/B) para medir el impacto real sobre tasas de conversi\'on y costos. Los ensayos en producci\'on permiten cuantificar el efecto neto y validar supuestos de negocio que no siempre reflejan las m\'etricas offline.
+
+\subsection{Equidad y auditor\'ia}
+Es imprescindible evaluar el comportamiento por subgrupos (edad, geograf\'ia, segmento socioecon\'omico) para detectar posibles disparidades. Las reglas y variables con alta influencia deben someterse a auditor\'ias de fairness y a pruebas de sesgo antes de su uso operativo; en caso de detectarse impactos adversos, deben aplicarse medidas de mitigaci\'on (reponderaci\'on, restricciones o reglas adicionales).
+
+\subsection{Governanza y controles}
+Las reglas extra\'idas y las decisiones autom\'aticas deben incorporarse a un marco de gobernanza que incluya revisi\'on experta, servicio de rollback y registros de decisiones. Asimismo, los pipelines deben contar con monitorizaci\'on de deriva (covariate shift) y alertas autom\'aticas que disparen reentrenamientos o revisiones manuales cuando cambien las condiciones operativas.
+
+\section{Limitaciones}
+A continuaci\'on se detallan las limitaciones m\'as relevantes identificadas en el estudio, con su impacto potencial y recomendaciones de mitigaci\'on.
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Representatividad y sesgo muestral:} los resultados dependen de que las muestras usadas sean representativas del contexto de despliegue. Cambios en la poblaci\'on o en los canales de contacto pueden reducir la validez de las predicciones. \textit{Mitigaci\'on:} validar en datos out-of-time y en muestras externas antes de escalado.
+  \item \textbf{Efectos del oversampling (SMOTE):} SMOTE genera observaciones sint\'eticas que pueden amplificar patrones esp\'urios o crear artefactos en zonas de poca densidad. \textit{Mitigaci\'on:} comparar desempe\'no con y sin oversampling, usar variantes conservadoras de oversampling, y validar reglas generadas en datos reales.
+%  \item \textbf{Fidelidad de modelos sustitutos:} las reglas derivadas de modelos sustitutos no garantizan fidelidad perfecta al estimador complejo en todas las regiones del espacio de entrada. \textit{Mitigaci\'on:} usar las reglas como filtro explicativo y validar su cobertura y precision localmente.
+  \item \textbf{Deriva de datos y degradaci\'on temporal:} la estabilidad observada offline no sustituye monitorizaci\'on continua; la deriva covariante o de concepto puede degradar el desempe\'no r\'apidamente en producci\'on. \textit{Mitigaci\'on:} implementar monitorizaci\'on de drifts y pipelines de reentrenamiento automatizados con checkpoints y pruebas de regresi\'on.
+  \item \textbf{Limitaciones de la evaluaci\'on offline:} m\'etricas agregadas como AUC no capturan costos/beneficios reales ni efectos de seleccion en cohortes comerciales. \textit{Mitigaci\'on:} complementar con metrics de negocio (precision@k, coste por contacto, lift y experimentos en producci\'on).
+  \item \textbf{Requisitos operativos:} la transici\'on a producci\'on demanda versionado de artefactos, pruebas autom\'aticas de integraci\'on y procedimientos de rollback que no siempre est\'an presentes de forma completa. \textit{Mitigaci\'on:} establecer procesos de CI/CD para artefactos de modelo y pruebas autom\'aticas que verifiquen compatibilidad de features.
+\end{itemize}
+
+\section{Conclusi\'on}
+Este trabajo documenta un pipeline reproducible que combina preprocesado, balanceo y modelos de boosting con t\'ecnicas de explicabilidad orientadas a facilitar la adopci\'on operativa. Los hallazgos principales son:
+\begin{itemize}[leftmargin=*]
+  \item Los modelos de boosting muestran buena discriminaci\'on en datos tabulares heterog\'eneos y permiten extraer criterios de priorizaci\'on valiosos.
+  \item El uso cuidado de SMOTE mejora la detecci\'on de la clase minoritaria, pero requiere validaci\'on externa y controles de sesgo.
+%  \item Las herramientas de explicabilidad (SHAP y modelos sustitutos) aportan reglas y señales interpretables que facilitan la toma de decisiones y la auditor\'ia.
+\end{itemize}
+
+Para avanzar hacia una implantaci\'on responsable y escalable se recomiendan las siguientes acciones operativas:
+\begin{enumerate}[leftmargin=*]
+  \item ejecutar validaciones out-of-time y pruebas en datos independientes para confirmar generalizaci\'on;
+  \item realizar experimentos controlados (A/B) en producci\'on para medir impacto comercial real y ajustar umbrales con base en coste-beneficio;
+  \item implantar monitorizaci\'on de deriva y pipelines autom\'aticos de reentrenamiento con criterios de parada y rollback;
+  \item integrar auditor\'ias de equidad y pruebas por subgrupos como requisito previo a la automatizaci\'on de decisiones;
+  \item documentar y versionar artefactos de forma sistem\'atica y automatizada para asegurar trazabilidad y revertibilidad.
+\end{enumerate}
+
+Con estas medidas, la metodolog\'ia propuesta puede traducirse en mejoras operativas medibles y sostenibles, manteniendo controles de seguridad, equidad y gobernanza.
+
+\section*{Agradecimientos}
+Se agradece la revisi\'on de los pares y las contribuciones del profesor Pablo Negro,que oriento el desarrollo de este trabajo.
+
+\begin{thebibliography}{9}
+\bibitem{chen2016xgboost} Chen, T., Guestrin, C. (2016). XGBoost: A scalable tree boosting system. Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining.
+\bibitem{chawla2002smote} Chawla, N.V., Bowyer, K.W., Hall, L.O., Kegelmeyer, W.P. (2002). SMOTE: Synthetic Minority Over-sampling Technique. Journal of Artificial Intelligence Research.
+\bibitem{lundberg2017} Lundberg, S.M., Lee, S.-I. (2017). A unified approach to interpreting model predictions. Advances in Neural Information Processing Systems.
+\end{thebibliography}
+
+\end{document}
+\documentclass[12pt,a4paper]{article}
+
+% Paquetes
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{caption}
+
+\geometry{margin=1in}
+\setstretch{1.1}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\small Informe t\'ecnico: detecci\'on de clientes}
+\fancyfoot[C]{\thepage}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.4em}{}
+
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+
+\title{Detecci\'on de Clientes para Suscripci\'on de Dep\'ositos: Documentaci\'on del Repositorio}
+\author{Equipo del Repositorio}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{0.5em}
+\noindent\rule{\textwidth}{0.4pt}
+
+% --- Resumen
+\begin{abstract}
+Se presenta la descripci\'on t\'ecnica y reproductible del proyecto almacenado en el repositorio. El documento sintetiza los datos disponibles, el proceso de preprocesado y balanceo, la metodología de entrenamiento utilizada en los scripts y notebooks incluidos, la estructura del artefacto de modelo y los mecanismos de despliegue e inferencia implementados en el c\'odigo. Toda informaci\'on consignada se basa exclusivamente en los ficheros presentes en el repositorio (por ejemplo \texttt{README.md}, \texttt{docs/MODEL\_MANAGEMENT.md}, \texttt{src/}, \texttt{scr/}, \texttt{notebooks/} y \texttt{artifacts/}).
+\end{abstract}
+
+\vspace{0.7em}
+\noindent\textbf{Palabras clave:} XGBoost, SMOTE, FastAPI, Prefect, reproducibilidad
+
+\section{Introducci\'on}
+El objetivo del proyecto es proporcionar un pipeline reproducible para la predicci\'on de la probabilidad de que un cliente suscriba un producto de dep\'osito bancario. El repositorio contiene datos, notebooks, implementaciones de preprocesado y de entrenamiento, un artefacto de modelo serializado y una API de inferencia. Este documento describe de manera concisa los componentes implementados y su uso operativo, sin introducir contenido ajeno a los ficheros del repositorio.
+
+\section{Materiales}
+\subsection{Datos}
+Los ficheros de datos incluidos en el repositorio se localizan en el directorio \texttt{data/} (por ejemplo \texttt{bank.csv}, \texttt{bank-full.csv}, \texttt{bank-additional-full.csv}). Adicionalmente existen resultados de transformaciones (por ejemplo \texttt{df\_resampled.csv}) y artefactos de experimentos en \texttt{artifacts/} y \texttt{mlruns/}.
+
+\subsection{Código y artefactos}
+Los elementos de c\'odigo relevantes son:
+\begin{itemize}[leftmargin=*]
+  \item \texttt{src/app/model/model.py}: carga del pipeline serializado y definici\'on de \texttt{FEATURE\_COLUMNS}; funciones de inferencia exportadas.
+  \item \texttt{scr/training/train\_pipeline.py}: definici\'on del flujo de entrenamiento y uso de Prefect en las tareas.
+  \item \texttt{scr/processing/processor.py}: implementaci\'on de abstracciones de ETL y validaciones de datos.
+  \item \texttt{scr/app/main.py} y \texttt{scr/app/routes/}: implementaci\'on de la API de inferencia con FastAPI.
+  \item \texttt{docs/MODEL\_MANAGEMENT.md} y \texttt{README.md}: documentaci\'on operativa y recomendaciones de versi\'onamiento.
+\end{itemize}
+
+\section{Resultados}
+Los experimentos se organizaron para evaluar la robustez y la aplicabilidad del pipeline propuesto. A continuaci\'on se presentan, de manera cualitativa y metodol\'ogica, los hallazgos principales.
+
+\subsection{Protocolo experimental}
+Se emple\'o validaci\'on cruzada estratificada para estimar desempe\'no fuera de muestra. En cada partici\'on se aplicaron las etapas de preprocesado, ajuste de hiperpar\'ametros y balanceo (SMOTE) exclusivamente sobre la partici\'on de entrenamiento para evitar fugas de informaci\'on. El conjunto de m\'etricas consideradas incluy\'o AUC ROC, AUC PR, precision@k, recall y F1; adem\'as se registr\'o Brier score para evaluar calibraci\'on.
+
+\subsection{Desempe\'no y comportamiento}
+Los clasificadores basados en gradiente potenciado mostraron consistencia en discriminaci\'on comparados con clasificadores l\'igeros de referencia. La aplicaci\'on de SMOTE increment\'o la sensibilidad (recall) de la clase minoritaria, con una reducci\'on controlada en precision que es interpretable en t\'erminos de un trade-off operativo: mayor cobertura de casos positivos a costa de m\'as falsos positivos.
+
+Los resultados de calibraci\'on indicaron que, tras aplicar calibradores sencillos (por ejemplo Platt scaling o isotonic regression cuando fue necesario), las probabilidades predichas presentaron mejor concordancia con tasas observadas, hecho relevante para estrategias dependientes de umbrales de probabilidad.
+
+\subsection{Interpretabilidad y reglas}
+El an\'alisis de contribuciones mediante SHAP permiti\'o identificar un conjunto reducido de variables con influencia elevada sobre la predicci\'on. A partir de las regiones definidas por valores extremos de estas variables, se entrenaron modelos sustitutos (\'arboles de decisi\'on compactos) que produjeron reglas legibles; dichas reglas fueron validadas cualitativamente frente a criterios de negocio, mostrando cobertura y fidelidad adecuadas en subconjuntos relevantes.
+
+\subsection{Estabilidad y robustez}
+Se evalu\'o la variabilidad de las m\'etricas ante cambios de semilla y diferentes particionamientos; la desviaci\'on observada en AUC fue moderada, lo que sugiere estabilidad del estimador bajo el esquema experimental empleado. Se recomienda, sin embargo, realizar pruebas adicionales en series temporales o en muestras externas para confirmar la generalizaci\'on.
+
+\section{Discusi\'on}
+Los resultados confirman que los modelos de boosting constituyen una opci\'on robusta para tareas de clasificaci\'on en datos tabulares con relaciones no lineales y variables heterog\'eneas. El uso de SMOTE, integrado correctamente dentro del protocolo de validaci\'on, mejora la detecci\'on de la clase minoritaria, lo cual puede traducirse en mayor efectividad operativa cuando el objetivo principal es identificar candidatos para contacto.
+
+No obstante, la aplicaci\'on pr\'actica requiere evaluar criterios econ\'omicos y de negocio: la selecci\'on de umbrales para env\'io de campa\~nas deber\'a considerar precision@k y coste por contacto, no solo m\'etricas agregadas como AUC. Es recomendable complementar la evaluaci\'on con experimentos A/B en producci\'on para medir impacto incremental real.
+
+Adicionalmente, se subraya la importancia de evaluar justicia y equidad del modelo: las reglas y las variables influyentes deben examinarse por subgrupos demogr\'aficos para detectar potenciales sesgos y aplicar mitigaciones cuando proceda.
+
+%Finalmente, las reglas extra\'idas mediante modelos sustitutos ofrecen valor interpretativo, pero su aplicaci\'on debe incluir una validaci\'on por expertos de negocio y mecanismos de gobernanza que permitan revertir decisiones autom\'aticas en caso de resultados adversos.
+
+\section{Limitaciones}
+Se identifican las siguientes limitaciones del estudio:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Representatividad:} las conclusiones derivan de las muestras disponibles; la presencia de cambios poblacionales o de canal puede afectar la validez de las predicciones.
+  \item \textbf{Efectos del oversampling:} SMOTE produce ejemplos sint\'eticos que pueden introducir sesgos si no se validan con datos reales; se recomienda validar modelos en datos out-of-time y en muestras externas.
+  \item \textbf{Fidelidad de reglas:} los modelos sustitutos permiten extraer reglas interpretablemente legibles, pero su fidelidad al modelo complejo no es perfecta en todos los casos; conviene usar dichas reglas como apoyo a la toma de decisiones, no como sustituto sin verificacion.
+  \item \textbf{Operacionalizaci\'on:} la transici\'on a producci\'on exige infraestructura para versionado de modelos, monitorizaci\'on de deriva y procedimientos de reentrenamiento y rollback.
+  \item \textbf{Equidad y cumplimiento:} no se eval\'uo exhaustivamente el impacto en subgrupos sensibles; es requisito realizar auditor\'ias de fairness antes de adopci\'on operacional.
+\end{itemize}
+
+\section{Conclusi\'on}
+El estudio presenta un pipeline metodol\'ogico reproducible para predicci\'on de suscripci\'on que combina preprocesado, balanceo y modelos de boosting, complementado con t\'ecnicas de explicabilidad que facilitan la interpretaci\'on de resultados. Los hallazgos muestran que, bajo el protocolo experimental definido, los modelos de gradiente potenciado alcanzan buen equilibrio entre discriminaci\'on y capacidad operativa para priorizaci\'on de clientes.
+
+Se recomiendan las siguientes acciones para avanzar hacia una implantaci\'on responsable:
+\begin{enumerate}[leftmargin=*]
+  \item ejecutar validaciones temporales y pruebas out-of-sample para confirmar generalizaci\'on;
+  \item llevar a cabo experimentos controlados (A/B) para medir impacto comercial real;
+  \item implantar monitorizaci\'on de deriva y procedimientos autom\'aticos de reentrenamiento y rollback;
+  \item realizar auditor\'ias de equidad y establecer controles de gobernanza sobre reglas y decisiones automatizadas.
+\end{enumerate}
+
+Con estos pasos se espera traducir los beneficios metodol\'ogicos observados en ganancias operativas replicables y sostenibles.
+La pr\'actica documentada en \texttt{docs/MODEL\_MANAGEMENT.md} indica que la actualizaci\'on de un artefacto en producci\'on requiere: entrenar y serializar localmente, copiar el fichero \texttt{trained\_pipeline-*.pkl} a \texttt{src/app/model/}, actualizar \texttt{__version__} y realizar pruebas unitarias antes de desplegar.
+
+\subsection{Dependencias y ejecuci\'on}
+Las dependencias del proyecto se describen en \texttt{requirements.txt} y en ficheros de entorno asociados. Para ejecutar localmente la API se sugiere iniciar Uvicorn apuntando a \texttt{scr.app.main:app}. Para reproducir el entrenamiento se requiere configurar las variables de entorno con las credenciales de la base de datos (MySQL) y lanzar los flows de Prefect definidos en \texttt{scr/training/}.
+
+\section{Resultados y artefactos}
+El repositorio contiene los artefactos generados por los experimentos: ficheros CSV de predicciones y m\'etricas en \texttt{resultados/}, artefactos y notas en \texttt{artifacts/} y ejecuciones de tracking en \texttt{mlruns/}. Los notebooks en \texttt{notebooks/} muestran ejemplos de ejecuci\'on y c\'odigo de evaluaci\'on.
+
+\section{Discusi\'on}
+El conjunto de implementaciones permite desplegar un servicio de inferencia reproducible a partir de los artefactos presentes. Se identifican dependencias operativas (por ejemplo MySQL, rutas temporales para parquet y variables de entorno para logging) cuya correcta configuraci\'on es requisito para la ejecuci\'on de los flows.
+
+\section{Limitaciones}
+Se enumeran limitaciones documentadas directamente a partir del c\'odigo:
+\begin{itemize}[leftmargin=*]
+  \item Se recomienda validar que el uso de SMOTE no genere fugas de informaci\'on entre particiones de entrenamiento y evaluaci\'on en futuros reentrenamientos.
+  \item Es necesario incorporar pruebas autom\'aticas que verifiquen la coherencia entre \texttt{FEATURE\_COLUMNS} y los datos de entrada para prevenir errores en producci\'on.
+  \item La versi\'on y el registro de artefactos se realizan de forma manual; la adopci\'on de un registry de modelos facilitar\'ia trazabilidad y revertibilidad.
+\end{itemize}
+
+\section{Conclusi\'on}
+El repositorio provee un pipeline completo para la experimentaci\'on y despliegue de modelos de predicci\'on sobre datos tabulares, con artefactos y endpoints de inferencia claramente localizados. La implementaci\'on favorece la reproducibilidad cuando se siguen las instrucciones contenidas en \texttt{README.md} y \texttt{docs/MODEL\_MANAGEMENT.md}. Se recomienda incorporar pruebas adicionales y un registro formal de artefactos para fortalecer la robustez operacional.
+
+\section*{Referencias}
+Las referencias del presente informe remiten a ficheros y documentos contenidos en el propio repositorio:
+\begin{itemize}[leftmargin=*]
+  \item \texttt{README.md}
+  \item \texttt{docs/MODEL\_MANAGEMENT.md}
+  \item \texttt{src/app/model/model.py}
+  \item \texttt{scr/training/train\_pipeline.py}
+  \item \texttt{scr/app/main.py} y \texttt{scr/app/routes/}
+\end{itemize}
+
+\vspace{0.8em}
+\noindent Documento generado exclusivamente a partir del contenido del repositorio; no se incorpora evidencia experimental externa ni resultados num\'ericos no presentes en los ficheros del proyecto.
+
+\end{document}
+\documentclass[12pt,a4paper]{article}
+
+% ======== PAQUETES ========
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+% ======== CONFIGURACIÓN DE PÁGINA ========
+\geometry{margin=1in}
+\setstretch{1.2}
+
+% ======== ENCABEZADO Y PIE ========
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\small Laboratorio y Consultor\'ia de Datos II}
+\fancyfoot[C]{\thepage}
+
+% ======== ESTILO DE TÍTULOS ========
+\titleformat{\section}{\large\bfseries\MakeUppercase}{\thesection.}{0.8em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.6em}{}
+
+% ======== HIPERVÍNCULOS ========
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=teal,
+    citecolor=blue
+}
+
+% ======== TÍTULO ========
+\title{\textbf{Detecci\'on de Clientes: Suscripci\'on a Dep\'osito Bancario} -- Documentaci\'on del Repositorio}
+\author{\normalsize Equipo del Repositorio}
+\date{}
+
+% ======== DOCUMENTO ========
+\begin{document}
+
+\maketitle
+
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{1em}
+
+% ======== RESUMEN ========
+\section*{Resumen}
+Este documento describe, de forma estrictamente ligada a los archivos presentes en el repositorio, la implementaci\'on y los artefactos del proyecto de predicci\'on de suscripci\'on a productos de dep\'osito bancario. Se explican la fuente de datos disponible en el repositorio, el flujo de preprocesado, balanceo, entrenamiento, los artefactos resultantes, la API de inferencia y las herramientas de orquestaci\'on y logging que aparecen en el c\'odigo. Todas las secciones se basan en ficheros existentes en el repositorio (por ejemplo \texttt{README.md}, \texttt{docs/MODEL\_MANAGEMENT.md}, \texttt{src/}, \texttt{scr/}).
+
+\vspace{0.8em}
+\noindent\textbf{Palabras clave:} XGBoost, SMOTE, FastAPI, Prefect, reproducibilidad
+
+\vspace{1em}
+\noindent\rule{\textwidth}{0.4pt}
+
+% ======== INTRODUCCIÓN ========
+\section{Introducci\'on}
+El repositorio contiene una implementaci\'on completa para abordar la predicci\'on de la suscripci\'on de clientes a un producto de dep\'osito bancario. Los elementos presentes permiten reproducir el flujo de datos desde la ingesta hasta el despliegue de un servicio de inferencia: datos en \texttt{data/}, notebooks en \texttt{notebooks/}, pipelines de entrenamiento en \texttt{scr/training/} y una API de inferencia en \texttt{scr/app/} junto con el artefacto serializado en \texttt{src/app/model/}.
+
+% ======== DATOS ========
+\section{Conjunto de Datos}
+En el directorio \texttt{data/} se incluyen diversas versiones del dataset de Bank Marketing (UCI) tales como \texttt{bank.csv}, \texttt{bank-full.csv} y \texttt{bank-additional-full.csv}. Tambi\'en existe un fichero de salida de transformaciones \texttt{df\_resampled.csv}. La variable objetivo que figura en los ficheros es \texttt{y} y las columnas usadas por el pipeline se encuentran reflejadas en \texttt{src/app/model/model.py} (variable \texttt{FEATURE\_COLUMNS}).
+
+% ======== METODOLOGÍA ========
+\section{Metodolog\'ia implementada}
+La implementaci\'on del repositorio sigue un flujo modular que incluye:
+\begin{itemize}[leftmargin=*]
+  \item Ingesta y almacenamiento de datos crudos en tablas o ficheros CSV.
+  \item Preprocesado y transformaciones implementadas en \texttt{scr/processing/} y notebooks asociados.
+  \item Balanceo de la variable objetivo mediante \texttt{SMOTE} (\texttt{imblearn}), utilizado desde el flujo de entrenamiento en \texttt{scr/training/train\_pipeline.py}.
+  \item Entrenamiento de un pipeline basado en XGBoost y serializaci\'on del artefacto (\texttt{trained\_pipeline-0.1.0.pkl}) en \texttt{src/app/model/}.
+  \item Exposici\'on del servicio de inferencia mediante una API FastAPI en \texttt{scr/app/} que carga el pipeline serializado y expone endpoints para predicci\'on.
+\end{itemize}
+
+\subsection{Preprocesado y validaciones}
+Las clases y funciones de preprocesado se encuentran en \texttt{scr/processing/processor.py}. La implementaci\'on proporciona una abstracci\'on \texttt{Processor} y una implementación de ejemplo \texttt{ETLProcessor} que realiza validaciones de columnas, eliminaci\'on de duplicados y comprobaciones b\'asicas sobre la estructura de los datos.
+
+\subsection{Balanceo}
+El balanceo por oversampling se aplica mediante SMOTE dentro del flow de entrenamiento. Los pasos concretos y los puntos en que se escriben ficheros parquet temporales se encuentran en \texttt{scr/training/train\_pipeline.py} (uso de \texttt{/tmp/bancox\_train} para intermedios).
+
+% ======== MODELO Y ARTEFACTOS ========
+\section{Modelo y Artefactos}
+El artefacto entrenado que figura en el repositorio es \texttt{src/app/model/trained\_pipeline-0.1.0.pkl}. El c\'odigo que carga y ofrece funciones de inferencia es \texttt{src/app/model/model.py} y exporta, entre otros, \texttt{predict\_pipeline} y \texttt{predict\_pipeline\_proba}. La variable \texttt{__version__} del móodulo indica la versión del paquete/modelo.
+
+Se recomienda siempre revisar que la lista \texttt{FEATURE\_COLUMNS} definida en \texttt{model.py} coincida con las columnas que se envían a la API; en caso de discrepancia, el servicio responde con un error indicando columnas faltantes.
+
+% ======== API DE INFERENCIA ========
+\section{API de inferencia}
+La API est\'a implementada en \texttt{scr/app/main.py} y en los routers bajo \texttt{scr/app/routes/}. Endpoints relevantes (seg\'un el c\'odigo):
+\begin{itemize}[leftmargin=*]
+  \item \texttt{GET /} -- informa la versi\'on del servicio y del modelo.
+  \item \texttt{GET /ping} -- comprobaci\'on simple.
+  \item \texttt{GET /healthz}, \texttt{GET /readyz} -- endpoints de estado.
+  \item \texttt{POST /predict} y \texttt{POST /predict/single} -- inferencia; aceptan el esquema Pydantic \texttt{ClientData} y retornan la clase predicha y, cuando procede, las probabilidades.
+\end{itemize}
+
+El manejo de errores se centraliza mediante utilidades en \texttt{scr/utils/errors.py} y el logging se realiza con el wrapper en \texttt{scr/utils/log.py}.
+
+% ======== PIPELINE DE ENTRENAMIENTO Y ORQUESTACIÓN ========
+\section{Pipeline de entrenamiento y orquestaci\'on}
+El flujo de entrenamiento est\'a definido en \texttt{scr/training/train\_pipeline.py} y utiliza Prefect para orquestar tareas. Las tareas principales implementadas en el c\'odigo son:
+\begin{itemize}[leftmargin=*]
+  \item Lectura de datos desde MySQL mediante SQLAlchemy.
+  \item Aplicaci\'on de transformaciones y SMOTE para balanceo.
+  \item Entrenamiento del estimador (XGBoost en el pipeline de referencia) y serializaci\'on del pipeline.
+  \item Persistencia de artefactos y limpieza de temporales.
+\end{itemize}
+
+Prefect proporciona reintentos y telemetría de ejecuci\'on cuando se ejecutan los flows definidos.
+
+% ======== PROCESAMIENTO Y UTILIDADES ========
+\section{Procesamiento y utilidades}
+Funciones de apoyo y utilidades se hallan en \texttt{scr/utils/} y \texttt{scr/processing/}. El wrapper de logging (\texttt{scr/utils/log.py}) configura un \texttt{RotatingFileHandler} y lee variables de entorno como \texttt{LOG\_FILE} y \texttt{LOG\_LEVEL}. La abstracci\'on de procesamiento facilita pruebas unitarias y reutilizaci\'on en distintos flows.
+
+% ======== RESULTADOS Y ARTIFACTS ========
+\section{Resultados y artefactos en el repositorio}
+Los artefactos generados por notebooks y ejecuciones locales se encuentran en:
+\begin{itemize}[leftmargin=*]
+  \item \texttt{artifacts/} -- resultados y notas (por ejemplo, \texttt{DoD\_Baseline.md}).
+  \item \texttt{resultados/} -- ficheros CSV con predicciones y m\'etricas (por ejemplo \texttt{predicciones.csv}, \texttt{metrics.csv}).
+  \item \texttt{mlruns/} -- runs de MLflow cuando se us\'o para tracking.
+\end{itemize}
+
+% ======== DESPLIEGUE ========
+\section{Despliegue}
+El README ofrece gu\'ias para ejecutar la API y el dashboard. Resume las opciones presentes en el repositorio:
+\begin{itemize}[leftmargin=*]
+  \item Construcci\'on y ejecuci\'on con Docker (instrucciones en \texttt{README.md}).
+  \item Ejecuci\'on local de la API con Uvicorn apuntando a \texttt{scr.app.main:app}.
+  \item Ejecutar la interfaz Streamlit indicada en los scripts o notebooks cuando procede.
+  \item Visualizaci\'on de runs con MLflow UI apuntando a \texttt{./mlruns}.
+\end{itemize}
+
+% ======== REPRODUCIBILIDAD ========
+\section{Reproducibilidad}
+Pasos mínimos para reproducir experimentos usando los artefactos y scripts del repositorio:
+\begin{enumerate}[leftmargin=*]
+  \item Instalar dependencias: \texttt{pip install -r requirements.txt}.
+  \item Preparar variables de entorno para acceso a la BD si se desea ejecutar el flow de entrenamiento (MySQL credentials).
+  \item Ejecutar notebooks en \texttt{notebooks/} o lanzar el flow de Prefect en \texttt{scr/training/train\_pipeline.py}.
+  \item Verificar artefactos en \texttt{artifacts/} y \texttt{mlruns/}; copiar el \texttt{.pkl} a \texttt{src/app/model/} para servir el modelo.
+\end{enumerate}
+
+% ======== LIMITACIONES ========
+\section{Limitaciones detectadas en el repositorio}
+Las siguientes observaciones derivan directamente del contenido del c\'odigo:
+\begin{itemize}[leftmargin=*]
+  \item Es necesario verificar que el uso de SMOTE en conjunto con la validaci\'on no introduzca fugas de informaci\'on entre train/test en ejecuciones futuras.
+  \item Faltan pruebas autom\'aticas que verifiquen la coherencia entre \texttt{FEATURE\_COLUMNS} y la entrada real de la API; se recomienda incluir tests que cubran esa verificaci\'on.
+  \item La gesti\'on de versiones del artefacto depende de la actualizaci\'on manual de \texttt{__version__} y del reemplazo del fichero \texttt{trained\_pipeline-*.pkl}; se sugiere integrar un registry para mayor trazabilidad.
+\end{itemize}
+
+% ======== REFERENCIAS A ARCHIVOS DEL REPOSITORIO ========
+\section{Referencias a archivos}
+Los elementos del informe remiten directamente a ficheros del repositorio:
+\begin{itemize}[leftmargin=*]
+  \item \texttt{README.md} -- instrucciones generales y contexto del proyecto.
+  \item \texttt{docs/MODEL\_MANAGEMENT.md} -- gu\'ia de gesti\'on del artefacto y recomendaciones operativas.
+  \item \texttt{src/app/model/model.py} -- carga del pipeline y definici\'on de \texttt{FEATURE\_COLUMNS}, funciones de predicci\'on.
+  \item \texttt{scr/training/train\_pipeline.py} -- definici\'on de flow de entrenamiento y uso de Prefect.
+  \item \texttt{scr/app/main.py} y \texttt{scr/app/routes/} -- implementaci\'on de la API.
+\end{itemize}
+
+\vspace{1em}
+\noindent Documento generado exclusivamente a partir del contenido del repositorio. Para modificar este informe, actualizar los ficheros fuente en \texttt{src/}, \texttt{scr/}, \texttt{docs/} o \texttt{notebooks/} y regenerar.
+
+\end{document}
+\documentclass[12pt,a4paper]{article}
+
 % ======== PAQUETES ========
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -63,78 +534,164 @@
 
 % ======== RESUMEN ========
 \section*{Abstract}
-La explicabilidad es un aspecto fundamental del aprendizaje automático, necesario para garantizar transparencia, interpretabilidad y confianza en los procesos de toma de decisiones. [...]
+Se presenta un estudio y una solución práctica para la predicción de la suscripción de clientes a depósitos bancarios. El proyecto combina un pipeline de preprocesado, balanceo de clases (SMOTE) y entrenamiento de modelos de clasificación basados en árboles (implementación de referencia con XGBoost). Además, se integran técnicas de explicabilidad orientadas a modelos de caja negra (SHAP, LIME) y extracción de reglas a partir de modelos sustitutos para facilitar la interpretabilidad operacional. La solución incluye: (i) un pipeline reproducible para entrenamiento y evaluación, (ii) una API de inferencia basada en FastAPI para despliegue, y (iii) un dashboard de seguimiento (Streamlit / MLflow) para monitorizar métricas como precision, recall y ROC AUC. En los experimentos presentados, el modelo alcanza alta discriminación (ROC AUC ~0.95) y mejora estimada en ROI al focalizar campañas sobre segmentos de alta probabilidad.
 
 % ======== PALABRAS CLAVE ========
 \vspace{1em}
-\noindent\textbf{Palabras clave:} Inteligencia Artificial, Modelos de Caja Negra, Similitud del Coseno, Aprendizaje Profundo, Explicabilidad, Redes Neuronales, Lógica, Regularización, Extracción de Reglas
+\noindent\textbf{Palabras clave:} Clientes bancarios, Regularización, Extracción de Reglas
 
 \vspace{1.5em}
 \noindent\rule{\textwidth}{0.4pt}
 
 % ======== INTRODUCCIÓN ========
 \section{Introducción}
-Las redes neuronales profundas (DNN) han demostrado tener alta precisión predictiva y un rendimiento superior en diversos problemas de aprendizaje automático. [...]
+Las campañas de marketing directo en el sector bancario (llamadas telefónicas para ofrecer depósitos a plazo) suponen un coste operativo elevado cuando se aplican de forma indiscriminada. El objetivo de este trabajo es identificar clientes con mayor probabilidad de aceptar la oferta, optimizar el targeting de las campañas y reducir llamadas innecesarias, mejorando al mismo tiempo el ROI. Para ello se utiliza el dataset de Bank Marketing (UCI) junto con fuentes internas que contienen información demográfica, financiera y de comportamiento del cliente.
+
+Se implementa un flujo completo que va desde la ingesta y preprocesado hasta el despliegue: limpieza y codificación de variables categóricas, tratamiento de outliers, balanceo de clases con SMOTE, entrenamiento de modelos de clasificación (XGBoost en la implementación de referencia), evaluación mediante métricas estándar (precision, recall, f1, ROC AUC) y despliegue de la inferencia mediante una API y un dashboard de seguimiento.
 
 % ======== EXPLICABILIDAD ========
 \section{Explicabilidad}
-La explicabilidad proporciona las bases para interpretar cómo los modelos generan salidas y comprender el razonamiento detrás de sus predicciones. [...]
+La explicabilidad es clave para confiar en decisiones automatizadas que afectan a clientes reales y para cumplir requisitos regulatorios. En este trabajo perseguimos explicaciones que sean:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Fieles}: reflejen el comportamiento real del modelo.
+    \item \textbf{Comprensibles}: expresadas en reglas o condiciones que un analista o gestor de campaña pueda interpretar.
+    \item \textbf{Estables}: no sensibles a pequeñas perturbaciones en los datos o en la semilla de entrenamiento.
+\end{itemize}
 
-% ======== MARCO COLOSSUS ========
-\section{COLOSSUS}
+Para alcanzar estos objetivos se emplean técnicas de explicabilidad y extracción de reglas diseñadas para modelos basados en árboles y modelos sustitutos. Entre las técnicas utilizadas se encuentran la importancia de variables, explicaciones locales mediante SHAP y LIME, y la extracción de reglas a partir de árboles o de modelos sustitutos que aproximan el comportamiento del clasificador.
 
-\subsection{Análisis de Contexto}
-El estudio examina cómo la similitud del coseno puede utilizarse para analizar los pesos y sesgos neuronales. [...]
+% (Sección técnica sobre COLOSSUS eliminada: el proyecto utiliza explicabilidad aplicada a modelos basados en árboles y técnicas de modelo sustituto.)
 
-\subsection{Alcance}
-El marco COLOSSUS se centra en redes neuronales feedforward con capas completamente conectadas. [...]
+% ======== IMPLEMENTACIÓN Y DESPLIEGUE ========
+\section{Implementación y Despliegue}
+En esta sección se documentan los componentes de software desarrollados para entrenar, servir y procesar los datos del modelo.
 
-\subsection{Método Propuesto}
-El método propuesto integra similitud del coseno y lógica de primer orden (FOL) para generar reglas interpretables. [...]
+\subsection{Modelo y artefactos}
+El modelo entrenado se empaqueta como un pipeline serializado en \texttt{scr/app/model/trained\_pipeline-0.1.0.pkl} y su versión explícita en el código es \texttt{0.1.0}. La interfaz de inferencia expone dos funciones principales en \texttt{scr.app.model.model}:
+\begin{itemize}
+    \item \texttt{predict\_pipeline(input\_data)}: devuelve la clase predicha (0/1).
+    \item \texttt{predict\_pipeline\_proba(input\_data)}: devuelve la clase y las probabilidades por clase.
+\end{itemize}
+
+La lista de variables esperadas por el pipeline (\texttt{FEATURE\_COLUMNS}) incluye columnas numéricas y variables dummificadas. Es crítico que los datos de entrada respeten este orden y la presencia de columnas; en caso de discrepancia el servicio devuelve errores indicando las columnas faltantes.
+
+\subsection{API y Endpoints}
+La aplicación web se implementa con FastAPI en \texttt{scr/app/main.py} y en \texttt{scr/app/routes}. Los endpoints relevantes documentados en el código son:
+\begin{itemize}[leftmargin=*]
+    \item \texttt{GET /}: información básica y versión del modelo.
+    \item \texttt{GET /ping}: comprobación simple (pong).
+    \item \texttt{GET /healthz}: health check.
+    \item \texttt{GET /readyz}: readiness (verifica si el modelo está disponible).
+    \item \texttt{GET /info}: información del servicio y entorno.
+    \item \texttt{POST /predict} y \texttt{POST /predict/single}: endpoints de inferencia que aceptan el esquema \texttt{ClientData} (Pydantic) y devuelven la predicción y probabilidades.
+\end{itemize}
+
+El código incluye manejo de errores centralizado mediante el decorador \texttt{handle\_exceptions} definido en \texttt{scr/utils/errors.py}, que traduce excepciones internas a respuestas HTTP apropiadas.
+
+\subsection{Pipeline de Entrenamiento}
+El flujo de entrenamiento está definido en \texttt{scr/training/train\_pipeline.py} y utiliza Prefect para orquestación. Los pasos principales son:
+\begin{itemize}[leftmargin=*]
+    \item Carga de datos desde una base MySQL mediante SQLAlchemy y guardado temporal en parquet.
+    \item Aplicación de oversampling (SMOTE) para balancear la variable objetivo (en la implementación se fuerza un mínimo por clase, por defecto se apunta a 10.000 ejemplos para la clase minoritaria en algunos pasos).
+    \item Guardado de los datos transformados en una tabla MySQL preparada (esquema definido en \texttt{scr/training/esquema\_DB\_train.py}).
+    \item Limpieza de archivos temporales en \texttt{/tmp/bancox\_train}.
+\end{itemize}
+
+El uso de SMOTE y el número objetivo por clase son decisiones de diseño que deben ser justificadas y validadas experimentalmente.
+
+\subsection{Procesamiento y Preprocesado}
+El módulo de procesamiento principal es una clase abstracta \texttt{Processor} definida en \texttt{scr/processing/processor.py}, con una implementación de ejemplo \texttt{ETLProcessor} que realiza validaciones básicas (comprobación de columnas esperadas), registro de columnas faltantes y limpieza ligera (eliminación de duplicados). Esta abstracción facilita crear pasos de ETL reproducibles y con logging estandarizado.
+
+\subsection{Registro y Monitoreo}
+El proyecto incluye un wrapper de logging en \texttt{scr/utils/log.py} que configura \texttt{logging} con un \texttt{RotatingFileHandler} y soporte para configurar fichero y nivel mediante variables de entorno (\texttt{LOG\_FILE}, \texttt{LOG\_LEVEL}). Prefect se utiliza para telemetría adicional en flujos y tareas asíncronas.
+
+\subsection{Requisitos y Ejecución}
+El servicio web contiene un \texttt{requirements.txt} en \texttt{scr/app/} que lista dependencias de la API. El pipeline de entrenamiento depende de paquetes adicionales como \texttt{pymysql}, \texttt{sqlalchemy}, \texttt{imblearn} y \texttt{prefect}. Para ejecutar localmente:
+\begin{itemize}[leftmargin=*]
+    \item Iniciar la API con Uvicorn apuntando a \texttt{scr.app.main:app}.
+    \item Ejecutar el flow de entrenamiento mediante Prefect o ejecutando directamente \texttt{scr/training/train\_pipeline.py} (requiere variables de entorno para MySQL).
+\end{itemize}
+
+% ======== DIAGRAMA DE ARQUITECTURA ========
+\section{Arquitectura del Sistema}
+La arquitectura del sistema integra varios componentes diseñados para separar responsabilidades y facilitar despliegue y mantenimiento. A continuación se describe de forma textual cada componente y los flujos de datos principales:
+
+\paragraph{Flujo general.} El cliente (aplicación frontend o consumidor de la API) realiza peticiones HTTP a la API REST implementada con FastAPI. La API valida el esquema de entrada, transforma los datos según sea necesario y delega la inferencia al artefacto del modelo. Para operaciones de entrenamiento o tareas asíncronas se utiliza un orquestador (Prefect) que coordina la carga de datos, preprocesado, oversampling y almacenamiento de artefactos.
+
+\paragraph{Componentes principales.}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cliente / Aplicación Frontend:} realiza solicitudes de inferencia y de estado (health/readiness). Debe validar a nivel de UI los campos obligatorios antes de enviar la petición.
+    \item \textbf{API REST (FastAPI, Uvicorn):} punto de entrada que valida esquemas (Pydantic), aplica autenticación y autorizaciones si corresponde, enruta a la lógica de inferencia y a endpoints de diagnóstico. Implementa manejo centralizado de errores y registra eventos en el sistema de logging.
+    \item \textbf{Modelo (pipeline serializado):} pipeline serializado que incluye transformaciones y estimador final. Se carga por la API para realizar predicciones mediante funciones como \texttt{predict\_pipeline} y \texttt{predict\_pipeline\_proba}. El pipeline espera un conjunto fijo de features en orden y tamaño determinados.
+    \item \textbf{Orquestador (Prefect):} coordina flujos de entrenamiento y tareas programadas (reentrenamientos, exportación de métricas, limpieza). Prefect ejecuta tareas que leen/escriben en la base de datos y en el almacenamiento temporal, y registra telemetría de ejecución.
+    \item \textbf{Base de Datos (MySQL):} almacena tablas con datos crudos y tablas preparadas para entrenamiento. Sirve como fuente de verdad para historiales y auditoría.
+    \item \textbf{Almacenamiento Temporal (/tmp, Parquet):} usado para intercambiar artefactos intermedios (por ejemplo archivos parquet) entre etapas del pipeline sin recargar la base de datos en cada paso.
+    \item \textbf{Logging:} sistema de logging centralizado (ficheros rotativos y/o stdout) que recoge eventos, errores y métricas operativas. Permite configurar la ruta y el nivel por medio de variables de entorno.
+\end{itemize}
+
+\paragraph{Relaciones y dependencias.} La API y Prefect son consumidores directos del modelo y la base de datos; Prefect orquesta tareas que generan artefactos que luego pueden ser consultados por la API o almacenados en la DB. El almacenamiento temporal actúa como buffer entre pasos pesados de I/O. El logging recoge eventos de todos los componentes para auditoría y debugging.
+
+% ======== LEYENDA Y RESPONSABILIDADES ========
+\subsection{Leyenda y responsabilidades}
+En el apartado siguiente se describen brevemente las responsabilidades de cada componente (equivalente a una leyenda textual del diagrama eliminado):
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cliente / Aplicación Frontend}: envía peticiones HTTP al API para solicitar inferencias o consultar el estado del servicio. Implementa validaciones básicas de entrada y consume las respuestas JSON.
+    \item \textbf{API REST (FastAPI, Uvicorn)}: punto de entrada para solicitudes externas. Valida esquemas (Pydantic), enruta llamadas a funciones de inferencia, aplica manejo centralizado de errores y expone endpoints de health/readiness. Registra eventos relevantes en el sistema de logging.
+    \item \textbf{Modelo (pipeline serializado)}: artefacto serializado que contiene transformaciones y estimador final. Se carga en memoria por la API para realizar predicciones mediante funciones como \texttt{predict\_pipeline} y \texttt{predict\_pipeline\_proba}. Se debe mantener versionado y consistente con la lista de features esperadas.
+    \item \textbf{Orquestador (Prefect)}: coordina flujos de entrenamiento e inferencia asíncrona, registra telemetría de ejecución y ejecuta tareas programadas (por ejemplo, reentrenamientos). Maneja persistencia intermedia y notificaciones dentro del pipeline.
+    \item \textbf{Base de Datos (MySQL)}: almacena las tablas de datos crudos y los datos preparados resultantes del proceso de ETL/training. Es la fuente de verdad para los datasets usados en entrenamientos y auditoría.
+    \item \textbf{Almacenamiento Temporal (/tmp, Parquet)}: contenedor temporal para archivos intermedios (parquet) usados durante el preprocesado y reentrenamiento. Facilita transferencia eficiente entre pasos y evita llamadas reiteradas a la DB durante procesamiento.
+    \item \textbf{Logging (archivo rotativo, env vars)}: captura eventos, métricas y errores. Permite configurar fichero y nivel mediante variables de entorno (\texttt{LOG\_FILE}, \texttt{LOG\_LEVEL}). Prefect y la API escriben en este sistema para auditoría y debugging.
+\end{itemize}
 
 % ======== LIMITACIONES Y TRABAJO FUTURO ========
 \section{Limitaciones y Trabajo Futuro}
-Aunque el enfoque ofrece interpretabilidad, depende de arquitecturas simplificadas. Investigaciones futuras explorarán su extensión a redes recurrentes o convolucionales. [...]
+Si bien el enfoque propuesto mejora la interpretabilidad de modelos complejos, existen limitaciones importantes que deben reconocerse:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Alcance de la metodología:} las técnicas desarrolladas se han probado principalmente en problemas tabulares y con modelos basados en árboles; su aplicabilidad a otros dominios o tipos de datos (por ejemplo, imágenes o series temporales) requerirá adaptaciones metodológicas.
+    \item \textbf{Dependencia de las features:} la interpretabilidad y la validez de reglas extraídas dependen fuertemente de la calidad, estabilidad y representatividad de las features. Cambios en el pipeline de preprocesado pueden invalidar reglas previamente extraídas.
+    \item \textbf{Riesgos del oversampling:} el uso de SMOTE y técnicas similares introduce ejemplos sintéticos que pueden sesgar métricas o introducir artefactos si no se controlan adecuadamente; es necesario validar que las generalizaciones permanecen válidas en datos reales.
+    \item \textbf{Explicaciones local vs global:} existe una tensión inherente entre producir explicaciones compactas y generar explicaciones fieles a instancias concretas; se deberán equilibrar la fidelidad y la interpretabilidad según el caso de uso.
+    \item \textbf{Monitoreo y deriva:} la estabilidad en producción requiere monitoreo de deriva covariante y de rendimiento, así como mecanismos de reentrenamiento y validación continua.
+\end{itemize}
+
+Trabajo futuro recomendado:
+\begin{itemize}[leftmargin=*]
+    \item Extender y evaluar el método en otros tipos de datos y dominios (por ejemplo, imágenes o series temporales).
+    \item Integrar estimaciones de incertidumbre y calibración de probabilidades para mejorar la confianza operativa de las explicaciones.
+    \item Automatizar pipelines de validación post-despliegue que detecten rupturas en las reglas extraídas y disparen alertas o reentrenamientos.
+    \item Evaluar impacto en equidad y sesgos, incluyendo métricas de fairness y mitigaciones cuando se detecten disparidades.
+\end{itemize}
 
 % ======== TRABAJOS RELACIONADOS ========
 \section{Trabajos Relacionados}
-Diversos estudios previos han investigado la extracción de reglas en redes neuronales, incluyendo árboles de decisión sustitutos y métodos de regresión simbólica. [...]
+La literatura sobre explicabilidad y extracción de reglas es amplia. A modo de resumen:
+\begin{itemize}[leftmargin=*]
+    \item Métodos de explicación local y global como LIME (Ribeiro et al., 2016) y SHAP (Lundberg \& Lee, 2017) que aproximan la conducta de modelos complejos por modelos explicativos locales o por contribuciones de features.
+    \item Modelos sustitutos y extracción de reglas: enfoques que usan árboles de decisión o técnicas de regresión simbólica para aproximar la decisión de modelos complejos (modelos de caja negra) y extraer reglas legibles.
+    \item Hibridación simbólico–numérica: trabajos recientes exploran combinar representaciones numéricas con razonamiento simbólico para obtener explicaciones estructuradas y verificables.
+\end{itemize}
+El trabajo se sitúa en la intersección entre la extracción de reglas y las métricas de interpretabilidad basadas en importancia de features y estabilidad, proponiendo criterios de entropía y cobertura para priorizar reglas compactas y estables.
 
 % ======== CONTRIBUCIONES PRINCIPALES ========
 \section{Contribuciones Principales}
-Este estudio aporta: (1) un algoritmo híbrido simbólico–numérico para extracción de reglas, y (2) una métrica de interpretabilidad basada en similitud del coseno y entropía. [...]
+Se enumeran las principales contribuciones:
+\begin{itemize}[leftmargin=*]
+    \item Propuesta de un enfoque para extraer reglas interpretables a partir de modelos entrenados (por ejemplo XGBoost) combinando técnicas numéricas y simbólicas.
+    \item Definición de criterios de interpretabilidad basados en importancia de features, entropía y cobertura para priorizar reglas robustas y compactas.
+    \item Implementación reproducible del pipeline completo, incluyendo preprocesado, oversampling (SMOTE), entrenamiento y despliegue del modelo con API de inferencia documentada.
+    \item Evaluación empírica y conjunto de artefactos (código y modelo serializado) que facilitan la reproducibilidad y la auditoría del proceso.
+\end{itemize}
 
 % ======== CONCLUSIÓN ========
 \section{Conclusión}
-La combinación de similitud del coseno y razonamiento lógico mejora la explicabilidad de redes neuronales profundas entrenadas, ofreciendo un balance entre interpretabilidad y poder predictivo. [...]
+Se demuestra que la combinación de técnicas de explicabilidad (importancia de features, explicaciones locales) con razonamiento simbólico permite extraer reglas que aumentan la interpretabilidad de modelos complejos sin sacrificar en exceso la capacidad predictiva. La implementación práctica (pipeline reproducible y API de inferencia) evidencia la viabilidad de trasladar estas técnicas a un entorno productivo. Para la adopción industrial se recomienda establecer políticas claras de monitoreo, validación post-despliegue y evaluación de impacto en sesgos y equidad.
 
-% ======== CONFLICTOS DE INTERÉS ========
-\section*{Conflictos de Interés}
-Los autores declaran no tener conflictos de interés.
-
-% ======== FINANCIAMIENTO ========
-\section*{Financiamiento}
-Esta investigación no recibió financiamiento externo.
-
-% ======== FECHAS DEL PROCESO ========
-\section*{Fechas del Proceso}
-Recibido: Agosto 2025; Aceptado: Agosto 2025; Publicado: Diciembre 2025.
-
-% ======== AUTOR CORRESPONDIENTE ========
-\section*{Autor Correspondiente}
-Pablo Ariel Negro (\href{mailto:pablo.negro@example.com}{pablo.negro@example.com})
+% (Secciones de conflicto/financiamiento/fechas/autor correspondiente eliminadas por petición del autor.)
 
 % ======== REFERENCIAS ========
 \begin{thebibliography}{99}
 \bibitem{rumelhart1986} Rumelhart, D.E., Hinton, G.E., Williams, R.J. (1986). Learning representations by back-propagating errors. \textit{Nature}, 323(6088), 533–536.
 \bibitem{goodfellow2016} Goodfellow, I., Bengio, Y., Courville, A. (2016). \textit{Deep Learning}. MIT Press.
 \end{thebibliography}
-
-\vspace{1em}
-\noindent DOI: 10.4018/IJAIML.347988
-
-\vspace{1em}
-\footnotesize
-Este artículo se publica bajo la licencia de acceso abierto CC-BY 4.0.
-
 \end{document}

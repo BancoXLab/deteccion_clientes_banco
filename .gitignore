@@ -7,3 +7,90 @@
 *.jks
 secrets/
 config/*.secret
+
+# __________ BUILD ARTIFACTS & PACKAGING
+/build/
+/dist/
+*.egg-info/
+*.egg
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.Python
+.eggs/
+
+# __________ PYTHON ENVIRONMENTS
+.venv/
+venv/
+env/
+ENV/
+.venv*/
+venv*/
+
+# __________ IDE & EDITOR
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# __________ PYTEST & TEST CACHE
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# __________ MLFLOW & MODEL ARTIFACTS
+mlflow.db
+mlruns/
+/models/*.pkl
+/models/**/*.pkl
+
+# __________ DATA & LARGE FILES
+*.parquet
+data_raw/
+/data/*.parquet
+*.csv.gz
+artifacts/resultados/
+results/
+
+# __________ JUPYTER NOTEBOOKS (LOCAL STATE)
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# __________ DOCKER
+.dockerignore
+docker-compose.override.yml
+
+# __________ SYSTEM
+.git/
+FETCH_HEAD
+
+# Build / packaging
+build/
+banco_x_detector.egg-info/
+
+# Python
+*.pyc
+__pycache__/
+
+# pytest cache
+.pytest_cache/
+
+# Environment
+.venv
+.venv*/
+
+# ML artifacts / data / models
+mlruns/
+mlflow.db
+models/*.pkl
+artifacts/resultados/
+
+# Jupyter
+*.ipynb_checkpoints
+
+# OS files
+.DS_Store
