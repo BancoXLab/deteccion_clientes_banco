@@ -65,6 +65,12 @@ markers = [
     "unit: mark test as unit test",
     "slow: mark test as slow running"
 ]
+filterwarnings = [
+    "ignore::PendingDeprecationWarning",
+    "ignore::DeprecationWarning",
+    "ignore:.*UserWarning:UserWarning",
+    "ignore::pytest.PytestReturnNotNoneWarning"
+]
 
 [tool.black]
 line-length = 100

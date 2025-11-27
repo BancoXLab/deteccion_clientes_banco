@@ -53,6 +53,26 @@ services:
     networks:
       - bancox_network
 
+  prefect:
+    build: .
+    container_name: bancox_prefect
+    image: bancox_prefect:latest
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./data:/app/data
+    environment:
+      - PYTHONPATH=/app
+    # Mantener el contenedor en ejecución; ejecutar el CLI `prefect` manualmente dentro.
+    command: ["/bin/sh", "-c", "tail -f /dev/null"]
+    depends_on:
+      - mysql
+      - mlflow
+    networks:
+      - bancox_network
+
   fastapi:
     image: bancox:latest
     build: .

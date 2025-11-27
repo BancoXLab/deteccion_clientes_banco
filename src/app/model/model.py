@@ -2,6 +2,7 @@ import pickle
 from pathlib import Path
 import numpy as np
 from typing import Dict, Any
+import pandas as pd
 
 __version__ = "0.1.0"
 
@@ -9,8 +10,17 @@ __version__ = "0.1.0"
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BASE_DIR / f"trained_pipeline-{__version__}.pkl"
 
-# Cargar el modelo entrenado
-with open(MODEL_PATH, "rb") as f:
+# Cargar el modelo entrenado. Preferir el modelo en `model/` en la raíz del repo
+# (fixture de tests guarda ahí). Si no existe, usar el empaquetado en `src/app/model/`.
+alt = Path.cwd() / "model" / f"trained_pipeline-{__version__}.pkl"
+if alt.exists():
+    load_path = alt
+elif MODEL_PATH.exists():
+    load_path = MODEL_PATH
+else:
+    raise FileNotFoundError(f"Modelo no encontrado en {alt} ni en {MODEL_PATH}")
+
+with open(load_path, "rb") as f:
     model = pickle.load(f)
 
 # Lista de columnas/orden que espera el modelo (sin la variable target 'y')
@@ -41,9 +51,9 @@ def predict_pipeline(input_data: Dict[str, Any]) -> int:
     if missing:
         raise ValueError(f"Faltan columnas en los datos de entrada: {missing}")
 
-    # construir X
+    # construir X como DataFrame para mantener nombres de columnas (evita warnings de sklearn)
     try:
-        X = np.array([input_data[col] for col in FEATURE_COLUMNS]).reshape(1, -1)
+        X = pd.DataFrame([{col: input_data[col] for col in FEATURE_COLUMNS}])
     except KeyError as e:
         raise ValueError(f"Falta la columna esperada en los datos de entrada: {e}")
     except Exception as e:
@@ -79,8 +89,9 @@ def predict_pipeline_proba(input_data: Dict[str, Any]) -> tuple:
         raise ValueError(f"Faltan columnas en los datos de entrada: {missing}")
 
     # construir X
+    # construir X como DataFrame para mantener nombres de columnas (evita warnings de sklearn)
     try:
-        X = np.array([input_data[col] for col in FEATURE_COLUMNS]).reshape(1, -1)
+        X = pd.DataFrame([{col: input_data[col] for col in FEATURE_COLUMNS}])
     except KeyError as e:
         raise ValueError(f"Falta la columna esperada en los datos de entrada: {e}")
     except Exception as e:

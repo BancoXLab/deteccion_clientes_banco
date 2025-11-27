@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Text
 from sqlalchemy.orm import declarative_base, sessionmaker
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 DB_URL = os.getenv("ALERTS_DB_URL")
@@ -26,7 +26,8 @@ class Alert(Base):
     level = Column(String(32), index=True)
     message = Column(Text)
     extra = Column(Text, nullable=True)
-    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    # Use timezone-aware UTC timestamp to avoid DeprecationWarning in SQLAlchemy
+    timestamp = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
 
 
 class Metric(Base):
@@ -34,7 +35,7 @@ class Metric(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(128), index=True)
     value = Column(Float)
-    ts = Column(DateTime, default=datetime.utcnow, index=True)
+    ts = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
 
 
 def init_db():

@@ -178,3 +178,18 @@ def export_mlflow_metrics_to_csv():
         }])
         df_err.to_csv(csv_path, index=False)
         return
+
+        # Cleanup logging handlers
+    def pytest_sessionfinish(session, exitstatus):
+        """Cleanup logging handlers that some libraries (e.g. Prefect/rich) may leave open.
+
+        Esto evita que handlers intenten escribir en streams ya cerrados al finalizar pytest
+        (evita errores tipo "I/O operation on closed file").
+        """
+        import logging
+        try:
+            logger = logging.getLogger("prefect")
+            for h in list(logger.handlers):
+                logger.removeHandler(h)
+        except Exception:
+            pass
