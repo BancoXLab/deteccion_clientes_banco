@@ -33,10 +33,14 @@ TMP_DIR = Path(os.getenv("BANCX_TMP_DIR", "/tmp/bancox_train"))
 TMP_DIR.mkdir(parents=True, exist_ok=True)
 
 # Directorios de modelos y resultados
-MODEL_DIR = Path(os.getenv("BANCX_MODEL_DIR", "/workspaces/deteccion_clientes_banco/model"))
+# Usar rutas relativas para compatibilidad con CI/CD
+_DEFAULT_MODEL_DIR = Path.cwd() / "model"
+_DEFAULT_RESULTS_DIR = Path.cwd() / "artifacts" / "resultados"
+
+MODEL_DIR = Path(os.getenv("BANCX_MODEL_DIR", str(_DEFAULT_MODEL_DIR)))
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
-RESULTS_DIR = Path(os.getenv("BANCX_RESULTS_DIR", "/workspaces/deteccion_clientes_banco/artifacts/resultados"))
+RESULTS_DIR = Path(os.getenv("BANCX_RESULTS_DIR", str(_DEFAULT_RESULTS_DIR)))
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # MLflow

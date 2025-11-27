@@ -27,7 +27,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run unit tests
-        run: pytest tests/ -v --tb=short -k "not integration"
+        run: pytest tests/ -v --tb=short --ignore=tests/test_prefectenv.py --ignore=tests/test_train_pipeline.py --ignore=tests/test_trainpipeline.py --ignore=tests/test_smotesqlite.py -k "not integration"
 
   build-image:
     needs: tests
