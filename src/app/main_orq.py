@@ -172,13 +172,21 @@ async def predict(input_data: List[Dict[str, Any]]) -> Dict[str, Any]:
             reverse=True
         )
         
+        mensaje_humano = (
+            f"Se recibieron {len(input_data)} clientes. "
+            f"Encontramos {len([r for r in results_sorted if 'probability' in r])} "
+            f"clientes con alta probabilidad de suscribirse. "
+            "Abajo podés ver el detalle."
+        )
+
         return {
-            "success": True,
-            "total_input": len(input_data),
-            "total_positive_predictions": len([r for r in results_sorted if "probability" in r]),
-            "results": results_sorted,
-            "model_version": model_version,
-            "timestamp": datetime.now().isoformat(),
+            "mensaje": mensaje_humano,
+            "clientes_probables": [
+                {
+                    "cliente": r["client_id"]
+                }
+                for r in results_sorted if "probability" in r
+            ]
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail={
