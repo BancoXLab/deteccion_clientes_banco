@@ -1,4 +1,4 @@
-version: '3.8'
+
 services:
   mysql:
     image: mysql:8.0
@@ -265,6 +265,43 @@ services:
     - alert-server
     networks:
     - bancox_network
+  redis:
+    image: redis:7
+    container_name: bancox_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - bancox_network
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: bancox_mailhog
+    ports:
+      - "8025:8025"
+    networks:
+      - bancox_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: bancox_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - bancox_network
+
+  grafana:
+    image: grafana/grafana:9.0.0
+    container_name: bancox_grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - bancox_network
 networks:
   bancox_network:
     driver: bridge
@@ -272,4 +309,6 @@ volumes:
   mysql_data:
     driver: local
   mlflow_data:
+    driver: local
+  grafana_data:
     driver: local

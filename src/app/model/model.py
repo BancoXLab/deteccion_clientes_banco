@@ -12,13 +12,24 @@ MODEL_PATH = BASE_DIR / f"trained_pipeline-{__version__}.pkl"
 
 # Cargar el modelo entrenado. Preferir el modelo en `model/` en la raíz del repo
 # (fixture de tests guarda ahí). Si no existe, usar el empaquetado en `src/app/model/`.
-alt = Path.cwd() / "model" / f"trained_pipeline-{__version__}.pkl"
-if alt.exists():
-    load_path = alt
-elif MODEL_PATH.exists():
-    load_path = MODEL_PATH
+import os
+
+# Allow overriding model path via env var for clarity in deploy/tests
+env_model = os.getenv("BANCX_MODEL_PATH")
+if env_model:
+    env_path = Path(env_model)
+    if env_path.exists():
+        load_path = env_path
+    else:
+        raise FileNotFoundError(f"BANCX_MODEL_PATH está definido pero no existe: {env_path}")
 else:
-    raise FileNotFoundError(f"Modelo no encontrado en {alt} ni en {MODEL_PATH}")
+    alt = Path.cwd() / "model" / f"trained_pipeline-{__version__}.pkl"
+    if alt.exists():
+        load_path = alt
+    elif MODEL_PATH.exists():
+        load_path = MODEL_PATH
+    else:
+        raise FileNotFoundError(f"Modelo no encontrado en {alt} ni en {MODEL_PATH}; define BANCX_MODEL_PATH si usas otra ruta")
 
 with open(load_path, "rb") as f:
     model = pickle.load(f)
