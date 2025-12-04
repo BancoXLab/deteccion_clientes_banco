@@ -29,10 +29,9 @@ Limitations: puede reflejar sesgos demográficos (edad, tipo de trabajo, nivel e
 | Métrica   | Valor (aprox., según README y notebooks) |
 |-----------|------------------------------------------:|
 | Accuracy  | 0.92                                      |
-| F1-score  | 0.90 (aprox.)                             |
-| ROC AUC   | 0.95                                      |
-| Precision | 0.92 (aprox.)                             |
-| Recall    | 0.88 (aprox.)                             |
+| F1-score  | 0.82                                      |
+| Precision | 0.83                                      |
+| Recall    | 0.81                                      |
 
 Notas: Los valores indicados provienen del README del repositorio y de las salidas generadas por el notebook principal (`MVP+Dashboard.ipynb`). Para obtener números exactos re-ejecutar el pipeline de entrenamiento y consultar `metrics.csv` en la carpeta de resultados o la UI de MLflow (`./mlruns`).
 
