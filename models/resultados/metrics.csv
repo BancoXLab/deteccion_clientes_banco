@@ -1,0 +1,2 @@
+timestamp,modelo,accuracy,recall,precision,f1,accuracy_train,roc_auc
+2025-12-04 15:52:35,XGBoost,0.9255,0.8096,0.8373,0.8232,0.9419,0.9766
