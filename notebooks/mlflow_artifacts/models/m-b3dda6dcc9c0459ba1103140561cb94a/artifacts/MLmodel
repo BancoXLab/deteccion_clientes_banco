@@ -1,0 +1,52 @@
+artifact_path: file:///workspaces/deteccion_clientes_banco/notebooks/mlflow_artifacts/models/m-b3dda6dcc9c0459ba1103140561cb94a/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.1
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+is_signature_from_type_hint: false
+mlflow_version: 3.4.0
+model_id: m-b3dda6dcc9c0459ba1103140561cb94a
+model_size_bytes: 697813
+model_uuid: m-b3dda6dcc9c0459ba1103140561cb94a
+prompts: null
+run_id: 685cc04804604bceb3b4658b7d82c252
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "long", "name": "age", "required": true}, {"type": "long", "name":
+    "month", "required": true}, {"type": "long", "name": "day_of_week", "required":
+    true}, {"type": "long", "name": "duration", "required": true}, {"type": "long",
+    "name": "campaign", "required": true}, {"type": "long", "name": "pdays", "required":
+    true}, {"type": "long", "name": "previous", "required": true}, {"type": "double",
+    "name": "emp.var.rate", "required": true}, {"type": "double", "name": "cons.price.idx",
+    "required": true}, {"type": "double", "name": "cons.conf.idx", "required": true},
+    {"type": "double", "name": "euribor3m", "required": true}, {"type": "double",
+    "name": "nr.employed", "required": true}, {"type": "long", "name": "previous_bin",
+    "required": true}, {"type": "double", "name": "job_target_mean", "required": true},
+    {"type": "long", "name": "marital_divorced", "required": true}, {"type": "long",
+    "name": "marital_married", "required": true}, {"type": "long", "name": "marital_single",
+    "required": true}, {"type": "long", "name": "marital_unknown", "required": true},
+    {"type": "double", "name": "education_freq_encode", "required": true}, {"type":
+    "long", "name": "housing_no", "required": true}, {"type": "long", "name": "housing_unknown",
+    "required": true}, {"type": "long", "name": "housing_yes", "required": true},
+    {"type": "long", "name": "loan_no", "required": true}, {"type": "long", "name":
+    "loan_unknown", "required": true}, {"type": "long", "name": "loan_yes", "required":
+    true}, {"type": "long", "name": "contact_cellular", "required": true}, {"type":
+    "long", "name": "contact_telephone", "required": true}]'
+  outputs: '[{"type": "long", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-12-04 17:04:55.126426'
