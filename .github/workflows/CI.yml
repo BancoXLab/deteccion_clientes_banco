@@ -29,27 +29,20 @@ jobs:
       - name: Create compatibility wrappers for moved scripts
         run: |
           # create lightweight wrappers in repo root so external callers keep working
-          cat > debug_predictions.py <<'PY'
-#!/usr/bin/env python3
-import runpy
-runpy.run_path('src/scripts/debug_predictions.py', run_name='__main__')
+          python - <<'PY'
+from pathlib import Path
+wrappers = {
+    'debug_predictions.py': 'src/scripts/debug_predictions.py',
+    'fix_predictions.py': 'src/scripts/fix_predictions.py',
+    'retrain_model.py': 'src/training/retrain_model.py',
+    'train_xgboost_model.py': 'src/training/train_xgboost_model.py',
+}
+for name, target in wrappers.items():
+    p = Path(name)
+    p.write_text('#!/usr/bin/env python3\nimport runpy\nrunpy.run_path(%r, run_name="__main__")\n' % target)
+    p.chmod(0o755)
+print('Wrappers created:', ', '.join(wrappers.keys()))
 PY
-          cat > fix_predictions.py <<'PY'
-#!/usr/bin/env python3
-import runpy
-runpy.run_path('src/scripts/fix_predictions.py', run_name='__main__')
-PY
-          cat > retrain_model.py <<'PY'
-#!/usr/bin/env python3
-import runpy
-runpy.run_path('src/training/retrain_model.py', run_name='__main__')
-PY
-          cat > train_xgboost_model.py <<'PY'
-#!/usr/bin/env python3
-import runpy
-runpy.run_path('src/training/train_xgboost_model.py', run_name='__main__')
-PY
-          chmod +x debug_predictions.py fix_predictions.py retrain_model.py train_xgboost_model.py || true
 
       - name: Run unit tests
         run: pytest tests/ -v --tb=short --ignore=tests/test_prefectenv.py --ignore=tests/test_train_pipeline.py --ignore=tests/test_trainpipeline.py --ignore=tests/test_smotesqlite.py -k "not integration"
