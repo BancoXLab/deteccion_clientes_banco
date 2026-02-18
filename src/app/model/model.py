@@ -93,6 +93,8 @@ def predict_pipeline_proba(input_data: Dict[str, Any]) -> tuple:
     """
     Predice clase y devuelve probabilidades.
     Retorna: (clase, probabilidad_clase_0, probabilidad_clase_1)
+    
+    NOTA: Usa threshold personalizado para compensar sesgo del modelo.
     """
     # comprobar que todas las columnas requeridas estén en input_data
     missing = [c for c in FEATURE_COLUMNS if c not in input_data]
@@ -118,16 +120,21 @@ def predict_pipeline_proba(input_data: Dict[str, Any]) -> tuple:
 
     # predecir clase y probabilidades
     try:
-        pred_class = model.predict(X)
         pred_proba = model.predict_proba(X) if hasattr(model, "predict_proba") else None
         
         if pred_proba is None:
             # Si el modelo no tiene predict_proba, devolver probabilidad 1.0 para la clase predicha
-            prob_0 = 0.0 if pred_class[0] == 1 else 1.0
-            prob_1 = 1.0 if pred_class[0] == 1 else 0.0
-            return int(pred_class[0]), prob_0, prob_1
+            pred_class = model.predict(X)[0]
+            prob_0 = 0.0 if pred_class == 1 else 1.0
+            prob_1 = 1.0 if pred_class == 1 else 0.0
+            return int(pred_class), prob_0, prob_1
         
-        # predict_proba devuelve [prob_clase_0, prob_clase_1]
-        return int(pred_class[0]), float(pred_proba[0][0]), float(pred_proba[0][1])
+        # ⭐ NUEVO: Usar threshold personalizado (0.35 en lugar de 0.5)
+        # Esto compensa el sesgo del modelo hacia Clase 0
+        DECISION_THRESHOLD = 0.35
+        prob_1_value = float(pred_proba[0][1])
+        pred_class_custom = int(prob_1_value >= DECISION_THRESHOLD)
+        
+        return pred_class_custom, float(pred_proba[0][0]), prob_1_value
     except Exception as e:
         raise RuntimeError(f"Error durante la predicción: {e}")

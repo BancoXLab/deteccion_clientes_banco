@@ -232,6 +232,25 @@ Incluye en la ejecución del pipeline las llamadas a `mlflow.log_param`, `mlflow
  - Dataset base: [UCI Bank Marketing Dataset](https://archive.ics.uci.edu/dataset/222/bank+marketing)
  - Presentación ejecutiva: propuesta_trabajo_(Revision).pptx
 
+## Solución rápida de predicciones
+
+Si la API está retornando siempre Clase 0, sigue la guía rápida en:
+
+- [docs/SOLUCION_RAPIDA_PREDICCIONES.md](docs/SOLUCION_RAPIDA_PREDICCIONES.md)
+
+Scripts relevantes (migrados a `src/`):
+
+- Diagnóstico: `python src/scripts/debug_predictions.py`
+- Correcciones rápidas / retrain wrappers: `python src/scripts/fix_predictions.py`
+- Reentrenamiento: `python src/training/retrain_model.py` y `python src/training/train_xgboost_model.py`
+
+Ejecuta los scripts desde el root del proyecto. Ejemplo:
+
+```bash
+python src/scripts/fix_predictions.py --quick
+docker-compose restart bancox-api
+```
+
 ---
 
 ## Equipo
